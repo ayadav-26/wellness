@@ -1,0 +1,242 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.dashboard-page {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-6;
+}
+
+.page-header {
+  @include flex-between;
+  margin-bottom: $spacing-4;
+
+  h1 {
+    color: $color-text-primary;
+    margin-bottom: 0;
+  }
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $spacing-6;
+
+  @include respond-to('lg') {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @include respond-to('md') {
+    grid-template-columns: 1fr;
+  }
+}
+
+.main-content-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: $spacing-6;
+
+  @include respond-to('lg') {
+    grid-template-columns: 1fr;
+  }
+}
+
+mat-card {
+  @include card;
+  
+  mat-card-header {
+    padding: $spacing-5 $spacing-6 0;
+    margin-bottom: $spacing-4;
+    
+    mat-card-title {
+      font-family: $font-display;
+      font-size: $text-xl;
+      color: $color-text-primary;
+    }
+  }
+
+  mat-card-content {
+    padding: 0 $spacing-6 $spacing-6;
+  }
+}
+
+.chart-container {
+  position: relative;
+  height: 300px;
+  width: 100%;
+}
+
+.booking-list {
+  display: flex;
+  flex-direction: column;
+
+  .booking-item {
+    display: flex;
+    align-items: center;
+    padding: $spacing-3 0;
+    border-bottom: 1px solid $color-border;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .booking-time {
+      font-weight: 600;
+      color: $color-primary;
+      width: 80px;
+      font-size: $text-sm;
+      flex-shrink: 0;
+    }
+
+    .booking-details {
+      flex: 1;
+
+      .customer-name {
+        font-weight: 500;
+        color: $color-text-primary;
+        font-size: $text-sm;
+      }
+
+      .therapy-name {
+        color: $color-text-secondary;
+        font-size: $text-xs;
+      }
+    }
+  }
+
+  .empty-bookings {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: $spacing-6 0;
+    color: $color-text-muted;
+    font-size: $text-sm;
+    text-align: center;
+
+    mat-icon {
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+      opacity: 0.3;
+    }
+  }
+}
+
+// Header
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+}
+
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: $text-xs;
+  font-weight: 600;
+  color: #2e7d32;
+  background: #e8f5e9;
+  padding: 3px 10px;
+  border-radius: 20px;
+
+  .live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #4caf50;
+    animation: pulse 1.5s infinite;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.refresh-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid $color-border;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: $color-text-secondary;
+
+  &:hover:not([disabled]) {
+    border-color: $color-primary;
+    color: $color-primary;
+    background: #f0f9f6;
+  }
+
+  &[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  mat-icon { font-size: 20px; width: 20px; height: 20px; }
+}
+
+// Error state
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-3;
+  padding: $spacing-8;
+  color: #b71c1c;
+  text-align: center;
+
+  mat-icon { font-size: 40px; width: 40px; height: 40px; }
+
+  p { margin: 0; font-size: $text-sm; }
+}
+
+.retry-btn {
+  padding: 8px 20px;
+  border-radius: 6px;
+  background: $color-primary;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: $text-sm;
+  font-weight: 500;
+  transition: background 0.2s;
+
+  &:hover { background: darken(#2C5F5D, 5%); }
+}
+
+// Count badge in mat-card-title
+.count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background: #e0e0e0;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #555;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+// Empty chart state
+.empty-chart {
+  height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: $color-text-muted;
+  gap: $spacing-3;
+
+  mat-icon { font-size: 48px; width: 48px; height: 48px; opacity: 0.25; }
+  p { margin: 0; font-size: $text-sm; }
+}

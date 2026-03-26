@@ -1,0 +1,113 @@
+<div class="dashboard-page animate-fade-in">
+  <div class="page-header">
+    <div class="header-left">
+      <h1 class="font-display text-3xl">Dashboard</h1>
+      <span class="live-badge">
+        <span class="live-dot"></span>Live
+      </span>
+    </div>
+    <button class="refresh-btn" (click)="loadDashboard()" [disabled]="loading()">
+      <mat-icon>refresh</mat-icon>
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="metrics-grid">
+      @for (i of [1,2,3,4]; track i) {
+        <app-skeleton-loader type="card" [rows]="1"></app-skeleton-loader>
+      }
+    </div>
+    <div class="main-content-grid">
+      <app-skeleton-loader type="card" [rows]="6"></app-skeleton-loader>
+      <app-skeleton-loader type="card" [rows]="6"></app-skeleton-loader>
+    </div>
+  } @else if (error()) {
+    <div class="error-state">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error() }}</p>
+      <button class="retry-btn" (click)="loadDashboard()">Retry</button>
+    </div>
+  } @else {
+    <!-- Stat Cards -->
+    <div class="metrics-grid stagger-children">
+      <app-stat-card
+        label="Bookings Today"
+        [value]="stats().bookingsToday"
+        icon="event_available">
+      </app-stat-card>
+      <app-stat-card
+        label="Active Therapists"
+        [value]="stats().activeTherapists"
+        icon="group"
+        color="#B07D2A">
+      </app-stat-card>
+      <app-stat-card
+        label="Cancellations Today"
+        [value]="stats().cancellationsToday"
+        icon="event_busy"
+        color="#B03A3A">
+      </app-stat-card>
+      <app-stat-card
+        label="Upcoming Bookings"
+        [value]="stats().upcomingToday.length"
+        icon="schedule"
+        color="#2A5F8F">
+      </app-stat-card>
+    </div>
+
+    <div class="main-content-grid stagger-children">
+      <!-- Chart Card -->
+      <mat-card class="chart-card">
+        <mat-card-header>
+          <mat-card-title>Booking Trends (Last 7 Days)</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          @if (barChartData.datasets[0].data.length > 0) {
+            <div class="chart-container">
+              <canvas baseChart
+                      [data]="barChartData"
+                      [options]="barChartOptions"
+                      [type]="'bar'">
+              </canvas>
+            </div>
+          } @else {
+            <div class="empty-chart">
+              <mat-icon>bar_chart</mat-icon>
+              <p>No booking data for the last 7 days.</p>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Upcoming Bookings -->
+      <mat-card class="upcoming-card">
+        <mat-card-header>
+          <mat-card-title>Upcoming Bookings
+            <span class="count-badge">{{ stats().upcomingToday.length }}</span>
+          </mat-card-title>
+          <mat-card-subtitle>Next 30 days</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="booking-list">
+            @for (booking of stats().upcomingToday; track booking.bookingId) {
+              <div class="booking-item">
+                <div class="booking-time">{{ booking.time }}</div>
+                <div class="booking-details">
+                  <div class="customer-name">{{ booking.customer }}</div>
+                  <div class="therapy-name">{{ booking.therapy }} · {{ booking.therapist }}</div>
+                </div>
+                <app-status-badge [status]="booking.status"></app-status-badge>
+              </div>
+            }
+            @empty {
+              <div class="empty-bookings">
+                <mat-icon>event_available</mat-icon>
+                <span>No upcoming bookings for the rest of today.</span>
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+</div>

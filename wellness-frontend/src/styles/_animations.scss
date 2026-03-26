@@ -1,0 +1,42 @@
+@use 'variables' as *;
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.animate-fade-in     { animation: fadeIn $transition-base both; }
+.animate-slide-up    { animation: slideUp $transition-slow both; }
+.animate-scale-in    { animation: scaleIn $transition-base both; }
+
+// Staggered children
+.stagger-children > * {
+  animation: slideUp $transition-slow both;
+  @for $i from 1 through 10 {
+    &:nth-child(#{$i}) { animation-delay: #{($i - 1) * 0.06}s; }
+  }
+}
+
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

@@ -1,0 +1,1359 @@
+{
+	"info": {
+		"_postman_id": "wellness-hub-api-collection",
+		"name": "WellnessHub API",
+		"description": "Comprehensive API collection for the Wellness Center Booking System.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Save token\", function() {",
+									"  var json = pm.response.json();",
+									"  pm.environment.set(\"token\", json.data.token);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@wellnesshub.com\",\n    \"password\": \"Admin@123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Authenticate user and receive JWT token."
+					},
+					"response": []
+				},
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Dr. Suresh\",\n    \"lastName\": \"Kumar\",\n    \"email\": \"suresh.kumar@wellnesshub.com\",\n    \"phoneNumber\": \"+919876543210\",\n    \"password\": \"Wellness@2025\",\n    \"role\": \"Admin\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Register a new Admin or Receptionist (Protected route)."
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Logout user (client-side disposal)."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Centers",
+			"item": [
+				{
+					"name": "Create Center",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Serenity Wellness Mumbai\",\n    \"address\": \"123 Marine Drive\",\n    \"city\": \"Mumbai\",\n    \"contactNumber\": \"+912244556677\",\n    \"openingTime\": \"08:00\",\n    \"closingTime\": \"20:00\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/centers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"centers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Centers",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/centers?page=1&limit=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"centers"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Center",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/centers/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"centers",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Center",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Serenity Wellness Mumbai (Updated)\",\n    \"contactNumber\": \"+912244556688\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/centers/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"centers",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Center",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/centers/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"centers",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Link Therapy Category",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"categoryId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/centers/1/categories",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"centers",
+								"1",
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Linked Categories",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/centers/1/categories",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"centers",
+								"1",
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Unlink Therapy Category",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/centers/1/categories/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"centers",
+								"1",
+								"categories",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Therapy Categories",
+			"item": [
+				{
+					"name": "Create Category",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"categoryName\": \"Ayurveda\",\n    \"description\": \"Traditional Indian medicine treatments\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/categories",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Categories",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/categories",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Category",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"Updated healing treatments\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/categories/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"categories",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Category",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/categories/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"categories",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Therapy Services",
+			"item": [
+				{
+					"name": "Search Therapies (Direction A & B)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/search/therapies?centerId=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"search",
+								"therapies"
+							],
+							"query": [
+								{
+									"key": "centerId",
+									"value": "1",
+									"description": "Direction A: Search therapies offered by this Center"
+								},
+								{
+									"key": "therapyName",
+									"value": "massage",
+									"disabled": true,
+									"description": "Direction B: Find centers offering this therapy (Partial match)"
+								},
+								{
+									"key": "categoryId",
+									"value": "2",
+									"disabled": true,
+									"description": "Filter by Category ID"
+								}
+							]
+						},
+						"description": "Search therapies matching a specific centerId (lists them) or therapyName (lists centers offering it)."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Therapy",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"therapyName\": \"Abhyanga Massage\",\n    \"categoryId\": 1,\n    \"durationMinutes\": 60,\n    \"price\": 2500,\n    \"requiredRoomType\": \"Standard\",\n    \"requiredSkill\": \"Ayurveda\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/therapies",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"therapies"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Therapies",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/therapies",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"therapies"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Therapy",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"price\": 2800\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/therapies/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"therapies",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Therapy",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/therapies/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"therapies",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Therapists",
+			"item": [
+				{
+					"name": "Create Therapist",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Priya\",\n    \"lastName\": \"Patel\",\n    \"gender\": \"Female\",\n    \"experienceYears\": 5,\n    \"skillSet\": [\"Ayurveda\", \"Spa\"],\n    \"centerId\": 1,\n    \"phoneNumber\": \"+919876543211\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/therapists",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"therapists"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Therapists",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/therapists",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"therapists"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Therapist",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/therapists/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"therapists",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Therapist",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"experienceYears\": 6\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/therapists/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"therapists",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Therapist",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/therapists/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"therapists",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Rooms",
+			"item": [
+				{
+					"name": "Create Room",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"centerId\": 1,\n    \"roomName\": \"Ganga Suite\",\n    \"roomType\": \"Standard\",\n    \"capacity\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/rooms",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"rooms"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Rooms",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/rooms",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"rooms"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Room",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"roomName\": \"Yamuna Suite\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/rooms/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"rooms",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Room",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/rooms/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"rooms",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Working Hours",
+			"item": [
+				{
+					"name": "Create Working Hours",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"centerId\": 1,\n    \"therapistId\": 1,\n    \"dayOfWeek\": \"Monday\",\n    \"startTime\": \"09:00\",\n    \"endTime\": \"17:00\",\n    \"breakStartTime\": \"13:00\",\n    \"breakEndTime\": \"14:00\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/working-hours",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"working-hours"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Working Hours",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/working-hours?therapistId=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"working-hours"
+							],
+							"query": [
+								{
+									"key": "therapistId",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Working Hours",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"endTime\": \"18:00\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/working-hours/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"working-hours",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Working Hours",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/working-hours/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"working-hours",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Therapist Leaves",
+			"item": [
+				{
+					"name": "Create Leave",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"therapistId\": 1,\n    \"leaveDate\": \"2025-06-20\",\n    \"reason\": \"Personal\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/leaves",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"leaves"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Leaves",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/leaves?therapistId=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"leaves"
+							],
+							"query": [
+								{
+									"key": "therapistId",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Leave",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/leaves/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"leaves",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Bookings & Slots",
+			"item": [
+				{
+					"name": "Get Available Slots",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/slots?centerId=1&therapyId=1&date=2025-06-15&genderPreference=Female",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"slots"
+							],
+							"query": [
+								{
+									"key": "centerId",
+									"value": "1"
+								},
+								{
+									"key": "therapyId",
+									"value": "1"
+								},
+								{
+									"key": "date",
+									"value": "2025-06-15"
+								},
+								{
+									"key": "genderPreference",
+									"value": "Female"
+								}
+							]
+						},
+						"description": "Discover available appointment slots for a center, therapy, and date."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Booking",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"centerId\": 1,\n    \"therapyId\": 1,\n    \"appointmentStartTime\": \"2025-06-15T10:00:00.000Z\",\n    \"therapistGenderPreference\": \"Female\",\n    \"customerName\": \"Anjali Mehta\",\n    \"customerPhone\": \"+919876543210\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/bookings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"bookings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Bookings",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/bookings?page=1&limit=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"bookings"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reschedule Booking",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"appointmentStartTime\": \"2025-06-15T11:00:00.000Z\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/bookings/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"bookings",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Booking",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/bookings/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"bookings",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Reports (Admin Only)",
+			"item": [
+				{
+					"name": "Booking Trends",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/reports/booking-trends?period=daily&startDate=2025-06-01&endDate=2025-06-30",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reports",
+								"booking-trends"
+							],
+							"query": [
+								{
+									"key": "period",
+									"value": "daily"
+								},
+								{
+									"key": "startDate",
+									"value": "2025-06-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2025-06-30"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Therapist Utilization",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/reports/therapist-utilization?centerId=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reports",
+								"therapist-utilization"
+							],
+							"query": [
+								{
+									"key": "centerId",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Peak Times",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/reports/peak-times",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reports",
+								"peak-times"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancellations",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/reports/cancellations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reports",
+								"cancellations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Customer History",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/reports/customer-history",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reports",
+								"customer-history"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000/api/v1"
+		},
+		{
+			"key": "token",
+			"value": ""
+		}
+	]
+}

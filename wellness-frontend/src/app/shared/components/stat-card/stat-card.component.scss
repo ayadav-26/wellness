@@ -1,0 +1,66 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.stat-card {
+  @include card;
+  padding: $spacing-6;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-3;
+  transition: box-shadow $transition-base, transform $transition-base;
+
+  &:hover {
+    box-shadow: $shadow-md;
+    transform: translateY(-2px);
+  }
+
+  .stat-header {
+    @include flex-between;
+    margin-bottom: $spacing-2;
+  }
+
+  .stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: $border-radius-md;
+    @include flex-center;
+  }
+
+  .stat-value {
+    font-family: $font-display;
+    font-size: $text-3xl;
+    font-weight: 600;
+    color: $color-text-primary;
+    margin-bottom: $spacing-1;
+  }
+
+  .stat-label {
+    font-size: $text-sm;
+    color: $color-text-secondary;
+  }
+
+  .stat-trend {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-size: $text-xs;
+    font-weight: 600;
+    padding: 2px $spacing-2;
+    border-radius: $border-radius-sm;
+    
+    mat-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+    }
+
+    &.up { 
+      color: $color-success; 
+      background: $color-success-bg;
+    }
+    &.down { 
+      color: $color-error; 
+      background: $color-error-bg;
+    }
+  }
+}

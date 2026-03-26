@@ -1,0 +1,81 @@
+<div class="login-page"> <!-- Reuse login-page layout for consistency -->
+  <div class="login-brand">
+    <div class="brand-name">WellnessHub</div>
+    <div class="brand-tagline">Start your journey to holistic wellness today.</div>
+  </div>
+
+  <div class="login-form-panel">
+    <div class="form-title">Join WellnessHub</div>
+    <div class="form-subtitle">Create your account to book therapies and manage your health.</div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="name-row">
+        <mat-form-field appearance="outline">
+          <mat-label>First Name</mat-label>
+          <input matInput formControlName="firstName" />
+          @if (form.get('firstName')?.hasError('required') && form.get('firstName')?.touched) {
+          <mat-error>Required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Last Name</mat-label>
+          <input matInput formControlName="lastName" />
+          @if (form.get('lastName')?.hasError('required') && form.get('lastName')?.touched) {
+          <mat-error>Required</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Email Address</mat-label>
+        <input matInput formControlName="email" type="email" />
+        <mat-icon matPrefix>mail</mat-icon>
+        @if (form.get('email')?.hasError('required') && form.get('email')?.touched) {
+        <mat-error>Email is required</mat-error>
+        } @else if (form.get('email')?.hasError('email')) {
+        <mat-error>Invalid email format</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Phone Number</mat-label>
+        <input matInput formControlName="phoneNumber" />
+        <mat-icon matPrefix>phone</mat-icon>
+        @if (form.get('phoneNumber')?.hasError('required') && form.get('phoneNumber')?.touched) {
+        <mat-error>Required</mat-error>
+        } @else if (form.get('phoneNumber')?.hasError('pattern')) {
+        <mat-error>Invalid 10-digit number</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Role selection removed: backend forces 'User' role -->
+
+      <mat-form-field appearance="outline">
+        <mat-label>Password</mat-label>
+        <input matInput formControlName="password" [type]="hidePassword() ? 'password' : 'text'" />
+        <mat-icon matPrefix>lock</mat-icon>
+        <button type="button" mat-icon-button matSuffix (click)="togglePassword()">
+          <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        @if (form.get('password')?.hasError('required') && form.get('password')?.touched) {
+        <mat-error>Password is required</mat-error>
+        } @else if (form.get('password')?.hasError('minlength')) {
+        <mat-error>Min 6 characters required</mat-error>
+        }
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || loading()">
+        @if (loading()) {
+        <mat-spinner diameter="20"></mat-spinner>
+        } @else {
+        Create Account
+        }
+      </button>
+
+      <div class="auth-footer">
+        Already have an account? <a routerLink="/login">Sign In</a>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,39 @@
+<div class="table-wrapper">
+  @if (loading) {
+    <app-skeleton-loader type="table" [rows]="8" />
+  } @else if (dataSource.data.length === 0) {
+    <app-empty-state [message]="emptyMessage" />
+  } @else {
+    <div class="table-scroll-area">
+      <mat-table [dataSource]="dataSource">
+        @for (col of columns; track col.key) {
+          <ng-container [matColumnDef]="col.key">
+            <mat-header-cell *matHeaderCellDef>
+              {{ col.label }}
+            </mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              @if (col.template) {
+                <ng-container
+                  [ngTemplateOutlet]="col.template"
+                  [ngTemplateOutletContext]="{ $implicit: row[col.key], row: row }">
+                </ng-container>
+              } @else if (col.formatter) {
+                {{ col.formatter(row) }}
+              } @else {
+                {{ row[col.key] }}
+              }
+            </mat-cell>
+          </ng-container>
+        }
+        <mat-header-row *matHeaderRowDef="displayedColumns" />
+        <mat-row *matRowDef="let row; columns: displayedColumns;"
+                 (click)="rowClick.emit(row)" />
+      </mat-table>
+    </div>
+    <mat-paginator [length]="totalCount || dataSource.data.length"
+                   [pageIndex]="pageIndex"
+                   [pageSize]="pageSize"
+                   [pageSizeOptions]="[10, 25, 50, 100]"
+                   (page)="onPageChange($event)" />
+  }
+</div>

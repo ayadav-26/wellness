@@ -1,0 +1,17 @@
+# Environment files (IMPORTANT)
+.env
+**/.env
+
+# Node
+node_modules/
+
+# .NET
+bin/
+obj/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

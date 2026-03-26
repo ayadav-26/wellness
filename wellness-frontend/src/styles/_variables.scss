@@ -1,0 +1,89 @@
+// Brand
+$color-primary:        #2C5F5D;
+$color-primary-light:  #3D7A78;
+$color-primary-dark:   #1E4240;
+$color-accent:         #C9A96E;
+$color-accent-light:   #E2C99A;
+
+// Neutrals
+$color-bg:             #F7F5F2;
+$color-surface:        #FFFFFF;
+$color-surface-alt:    #F0EDE8;
+$color-border:         #E2DDD6;
+$color-border-strong:  #C8C0B5;
+
+// Text
+$color-text-primary:   #1A1A1A;
+$color-text-secondary: #5A5550;
+$color-text-muted:     #9B948C;
+$color-text-inverse:   #FFFFFF;
+
+// Status
+$color-success:        #3A7D5C;
+$color-success-bg:     #EAF4EE;
+$color-warning:        #B07D2A;
+$color-warning-bg:     #FDF3E0;
+$color-error:          #B03A3A;
+$color-error-bg:       #FAECEC;
+$color-info:           #2A5F8F;
+$color-info-bg:        #E8F0FA;
+
+// Booking status colors
+$status-booked:        #2C5F5D;
+$status-completed:     #3A7D5C;
+$status-cancelled:     #B03A3A;
+$status-noshow:        #B07D2A;
+
+// Sidebar
+$sidebar-bg:           #1E3A38;
+$sidebar-text:         #B8CCC9;
+$sidebar-active-bg:    #2C5F5D;
+$sidebar-active-text:  #FFFFFF;
+$sidebar-hover-bg:     #274E4C;
+
+// ─── Typography ──────────────────────────────────────────────────────────────
+$font-display:  'Inter', sans-serif;
+$font-body:     'Inter', sans-serif;
+
+$text-xs:    0.75rem;
+$text-sm:    0.875rem;
+$text-base:  1rem;
+$text-lg:    1.125rem;
+$text-xl:    1.25rem;
+$text-2xl:   1.5rem;
+$text-3xl:   2rem;
+$text-4xl:   2.75rem;
+
+// ─── Spacing ─────────────────────────────────────────────────────────────────
+$spacing-1:   0.25rem;
+$spacing-2:   0.5rem;
+$spacing-3:   0.75rem;
+$spacing-4:   1rem;
+$spacing-5:   1.25rem;
+$spacing-6:   1.5rem;
+$spacing-8:   2rem;
+$spacing-10:  2.5rem;
+$spacing-12:  3rem;
+$spacing-16:  4rem;
+
+// ─── Layout ──────────────────────────────────────────────────────────────────
+$sidebar-width:           260px;
+$sidebar-collapsed-width: 72px;
+$topbar-height:           64px;
+
+// ─── Border Radius ───────────────────────────────────────────────────────────
+$border-radius-sm:   6px;
+$border-radius-md:   10px;
+$border-radius-lg:   16px;
+$border-radius-xl:   24px;
+
+// ─── Shadows ─────────────────────────────────────────────────────────────────
+$shadow-sm:   0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+$shadow-md:   0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+$shadow-lg:   0 8px 24px rgba(0, 0, 0, 0.10), 0 4px 8px rgba(0, 0, 0, 0.06);
+$shadow-xl:   0 20px 48px rgba(0, 0, 0, 0.12);
+
+// ─── Transitions ─────────────────────────────────────────────────────────────
+$transition-fast:   0.15s ease;
+$transition-base:   0.25s ease;
+$transition-slow:   0.4s cubic-bezier(0.4, 0, 0.2, 1);

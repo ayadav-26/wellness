@@ -1,0 +1,41 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.topbar {
+  height: $topbar-height;
+  background: $color-surface;
+  border-bottom: 1px solid $color-border;
+  padding: 0 $spacing-8;
+  @include flex-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: $shadow-sm;
+
+  .page-title {
+    h2 {
+      font-size: $text-lg;
+      font-weight: 500;
+      color: $color-text-primary;
+    }
+  }
+
+  .actions {
+    @include flex-center;
+    gap: $spacing-2;
+
+    .notification-btn {
+      color: $color-text-secondary;
+    }
+
+    .user-menu-btn {
+      border-radius: $border-radius-xl;
+      color: $color-text-secondary;
+      padding: 0 $spacing-2;
+    }
+    
+    .text-error {
+      color: $color-error;
+    }
+  }
+}

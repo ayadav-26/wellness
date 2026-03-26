@@ -1,0 +1,72 @@
+@use 'variables' as *;
+
+.table-wrapper {
+  display: flex;
+  flex-direction: column;
+  /* Constrain the whole table container so it fits on screen and scrolls internally */
+  max-height: calc(100vh - 270px);
+  border-radius: $border-radius-md;
+  box-shadow: $shadow-sm;
+  background: $color-surface;
+  border: 1px solid $color-border;
+}
+
+.table-scroll-area {
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+.mat-mdc-table {
+  width: 100%;
+  background: transparent;
+  font-family: $font-body;
+
+  .mat-mdc-header-row {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: $color-surface-alt;
+    border-bottom: 2px solid $color-border;
+    min-height: 44px !important;
+  }
+
+  .mat-mdc-header-cell {
+    font-family: $font-body;
+    font-size: 13px !important;  /* increased for better readability */
+    font-weight: 700;
+    color: $color-text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: none;
+    padding: $spacing-2 $spacing-4;
+  }
+
+  .mat-mdc-row {
+    border-bottom: 1px solid $color-border;
+    transition: background $transition-fast;
+    min-height: 48px !important; /* slightly increased for better row spacing */
+
+    &:hover {
+      background: rgba($color-primary, 0.03);
+    }
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .mat-mdc-cell {
+    font-size: 15px; /* increased to production-like size */
+    color: $color-text-secondary;
+    padding: $spacing-2 $spacing-4;
+    border-bottom: none;
+  }
+}
+
+.mat-mdc-paginator {
+  font-family: $font-body;
+  background: $color-surface;
+  border-top: 1px solid $color-border;
+  position: relative;
+  z-index: 5;
+}

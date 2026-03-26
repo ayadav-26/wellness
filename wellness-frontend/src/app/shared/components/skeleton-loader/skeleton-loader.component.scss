@@ -1,0 +1,26 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.skeleton-wrapper {
+  width: 100%;
+  
+  &.card {
+    @include card;
+    padding: $spacing-5;
+  }
+}
+
+.skeleton-line {
+  @include skeleton;
+  border-radius: $border-radius-sm;
+  height: 16px;
+  margin-bottom: $spacing-3;
+
+  &.wide   { width: 100%; }
+  &.medium { width: 60%; }
+  &.narrow { width: 35%; }
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}

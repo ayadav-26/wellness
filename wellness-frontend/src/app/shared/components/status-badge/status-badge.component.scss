@@ -1,0 +1,20 @@
+@use 'variables' as *;
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px $spacing-3;
+  border-radius: 999px;
+  font-size: $text-xs;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+
+  // From prompt
+  &.booked     { background: rgba($status-booked, 0.12);    color: $status-booked;    }
+  &.completed  { background: rgba($status-completed, 0.12); color: $status-completed; }
+  &.cancelled  { background: rgba($status-cancelled, 0.12); color: $status-cancelled; }
+  &.noshow     { background: rgba($status-noshow, 0.12);    color: $status-noshow;    }
+  &.active     { background: rgba($color-success, 0.12);    color: $color-success;    }
+  &.inactive   { background: rgba($color-text-muted, 0.12); color: $color-text-muted; }
+}

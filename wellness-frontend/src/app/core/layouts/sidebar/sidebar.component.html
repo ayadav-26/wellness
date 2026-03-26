@@ -1,0 +1,31 @@
+<aside class="sidebar" [class.collapsed]="collapsed()">
+  <div class="sidebar-header">
+    <div class="brand">
+      <mat-icon class="brand-icon">spa</mat-icon>
+      <span class="brand-name">WellnessHub</span>
+    </div>
+    <!-- <button class="collapse-btn" (click)="toggle.emit()">
+      <mat-icon>{{ collapsed() ? 'chevron_right' : 'chevron_left' }}</mat-icon>
+    </button> -->
+  </div>
+
+  <nav class="nav-items">
+    @for (item of navItems(); track item.route) {
+    <a class="nav-item" [routerLink]="item.route" [class.active]="isActive(item.route)" [matTooltip]="item.label"
+      [matTooltipDisabled]="!collapsed()" matTooltipPosition="right">
+      <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
+      <span class="nav-label">{{ item.label }}</span>
+    </a>
+    }
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="avatar">{{ user()?.firstName?.charAt(0) || 'U' }}</div>
+      <div class="user-details" [class.hidden]="collapsed()">
+        <div class="user-name">{{ user()?.firstName }} {{ user()?.lastName }}</div>
+        <div class="user-role">{{ user()?.role }}</div>
+      </div>
+    </div>
+  </div>
+</aside>

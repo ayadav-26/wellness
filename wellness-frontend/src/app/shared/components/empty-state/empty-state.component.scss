@@ -1,0 +1,39 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.empty-state {
+  @include flex-center;
+  flex-direction: column;
+  padding: $spacing-12 $spacing-6;
+  text-align: center;
+  width: 100%;
+
+  .icon-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: $color-surface-alt;
+    color: $color-text-muted;
+    @include flex-center;
+    margin-bottom: $spacing-4;
+
+    mat-icon {
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  h3 {
+    font-size: $text-lg;
+    font-weight: 600;
+    color: $color-text-primary;
+    margin-bottom: $spacing-2;
+  }
+
+  p {
+    font-size: $text-sm;
+    color: $color-text-secondary;
+    max-width: 400px;
+  }
+}

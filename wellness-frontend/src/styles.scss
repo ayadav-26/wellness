@@ -1,0 +1,289 @@
+// ─── Angular Material & Design Tokens ─────────────────────────────────────────
+@use '@angular/material' as mat;
+@use 'variables' as *;
+@use 'mixins' as *;
+@use 'reset';
+@use 'typography';
+@use 'components';
+@use 'animations';
+@use 'utilities';
+
+// ─── Google Fonts ─────────────────────────────────────────────────────────────
+// Note: @import url() must come after @use statements in Dart Sass
+// These are loaded via index.html or kept here (they work as CSS @import)
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
+// ─── Angular Material Theme ─────────────────────────────────────────────────
+@include mat.core();
+
+$wellness-theme: mat.define-theme((color: (theme-type: light,
+        primary: mat.$azure-palette,
+        tertiary: mat.$rose-palette,
+      ),
+      typography: (plain-family: 'Inter, sans-serif'
+      ),
+      density: (scale: 0)));
+
+html {
+  @include mat.all-component-themes($wellness-theme);
+}
+
+// ─── Global Base Styles ─────────────────────────────────────────────────────
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: $font-body;
+  font-size: $text-base;
+  background: $color-bg;
+  color: $color-text-primary;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// ─── Snackbar Overrides ──────────────────────────────────────────────────────
+.snack-success {
+  --mdc-snackbar-container-color: #{$color-success};
+  --mdc-snackbar-supporting-text-color: #ffffff;
+  --mat-snack-bar-button-color: #{$color-accent-light};
+}
+
+.snack-error {
+  --mdc-snackbar-container-color: #{$color-error};
+  --mdc-snackbar-supporting-text-color: #ffffff;
+  --mat-snack-bar-button-color: #ffcdd2;
+}
+
+.snack-warning {
+  --mdc-snackbar-container-color: #{$color-warning};
+  --mdc-snackbar-supporting-text-color: #ffffff;
+  --mat-snack-bar-button-color: #fff9c4;
+}
+
+.snack-info {
+  --mdc-snackbar-container-color: #{$color-info};
+  --mdc-snackbar-supporting-text-color: #ffffff;
+  --mat-snack-bar-button-color: #bbdefb;
+}
+
+.mat-mdc-snack-bar-container {
+  border-radius: $border-radius-md !important;
+  font-family: $font-body !important;
+  font-size: $text-sm !important;
+  box-shadow: $shadow-lg !important;
+  min-width: 320px !important;
+  max-width: 480px !important;
+}
+
+// ─── Dialog Overrides ────────────────────────────────────────────────────────
+.mat-mdc-dialog-container {
+  --mdc-dialog-container-shape: #{$border-radius-lg};
+}
+
+.mat-mdc-dialog-title {
+  font-family: $font-display !important;
+  font-size: $text-2xl !important;
+  font-weight: 500 !important;
+  color: $color-text-primary !important;
+  padding: $spacing-6 $spacing-8 $spacing-4 !important;
+}
+
+.mat-mdc-dialog-content {
+  padding: $spacing-4 $spacing-8 !important;
+  max-height: 65vh !important;
+}
+
+.mat-mdc-dialog-actions {
+  padding: $spacing-4 $spacing-8 $spacing-6 !important;
+  gap: $spacing-3;
+  justify-content: flex-end;
+}
+
+// ─── Form Field Overrides ────────────────────────────────────────────────────
+.mat-mdc-form-field {
+  width: 100%;
+  font-family: $font-body;
+}
+
+.mat-mdc-input-element {
+  font-family: $font-body !important;
+  font-size: $text-base !important;
+  color: $color-text-primary !important;
+}
+
+.mat-mdc-floating-label {
+  font-family: $font-body !important;
+}
+
+.mat-mdc-form-field-error {
+  font-family: $font-body !important;
+  font-size: $text-xs !important;
+  color: $color-error !important;
+}
+
+// ─── Table Overrides ─────────────────────────────────────────────────────────
+.mat-mdc-table {
+  font-family: $font-body;
+  width: 100%;
+  background: $color-surface;
+}
+
+.page-header h1 {
+  color: #1E3A38;
+  margin: 0;
+  font-family: $font-display;
+}
+
+.mat-mdc-header-cell {
+  font-size: $text-base !important;
+  font-weight: 600 !important;
+  color: $color-text-muted !important;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: $color-surface-alt !important;
+}
+
+.mat-mdc-cell {
+  font-family: $font-body !important;
+  font-size: $text-sm !important;
+  color: $color-text-secondary !important;
+}
+
+.mat-mdc-paginator {
+  font-family: $font-body !important;
+  background: $color-surface !important;
+  border-top: 1px solid $color-border;
+}
+
+// ─── Tab Overrides ───────────────────────────────────────────────────────────
+.mat-mdc-tab {
+  font-family: $font-body !important;
+  font-size: $text-sm !important;
+  font-weight: 500 !important;
+}
+
+.mdc-tab-indicator__content--underline {
+  border-color: $color-primary !important;
+  border-top-width: 3px !important;
+}
+
+// ─── Focus & Ripple Refinements ─────────────────────────────────────────────
+// Aggressively remove persistent focus/hover backgrounds that "stick" after click
+.mat-mdc-tab .mat-mdc-focus-indicator::before,
+.mat-mdc-tab .mat-mdc-tab-ripple::before,
+.mat-mdc-tab .mdc-tab__ripple::before,
+.mat-mdc-tab-link .mdc-tab__ripple::before,
+.mat-mdc-radio-button .mat-mdc-focus-indicator::before,
+.mat-mdc-radio-button .mat-mdc-radio-ripple::before,
+.mat-mdc-radio-button .mdc-radio__ripple::before,
+.mat-mdc-checkbox .mat-mdc-focus-indicator::before,
+.mat-mdc-checkbox .mat-mdc-checkbox-ripple::before,
+.mat-mdc-checkbox .mdc-checkbox__ripple::before {
+  display: none !important;
+  opacity: 0 !important;
+}
+
+// Ensure transparent backgrounds for interactive labels on focus/active
+.mat-mdc-tab:focus .mdc-tab__text-label,
+.mat-mdc-tab.mdc-tab--active .mdc-tab__ripple::before,
+.mat-mdc-radio-button:focus .mdc-label,
+.mat-mdc-checkbox:focus .mdc-label {
+  background-color: transparent !important;
+}
+
+// Remove background highlight from tab header paging area if present
+.mat-mdc-tab-header-pagination:focus .mat-mdc-focus-indicator::before {
+  display: none !important;
+}
+
+// ─── Stepper Overrides ───────────────────────────────────────────────────────
+.mat-step-label {
+  font-family: $font-body !important;
+  font-size: $text-sm !important;
+}
+
+.mat-step-icon-selected {
+  background-color: $color-primary !important;
+}
+
+.mat-step-icon-state-done {
+  background-color: $color-success !important;
+}
+
+// ─── Scrollbar ───────────────────────────────────────────────────────────────
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: $color-surface-alt;
+}
+
+::-webkit-scrollbar-thumb {
+  background: $color-border-strong;
+  border-radius: 3px;
+
+  &:hover {
+    background: $color-text-muted;
+  }
+}
+
+// ─── Material Symbols Global Override ───────────────────────────────────────
+.mat-icon,
+.mat-mdc-icon,
+.material-icons {
+  font-family: 'Material Symbols Outlined' !important;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  line-height: 1 !important;
+}
+
+// Fix for Material Form Field Icons (Prefix/Suffix)
+.mat-mdc-form-field-icon-prefix,
+.mat-mdc-form-field-icon-suffix {
+  padding: 0 8px !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+
+  .mat-icon {
+    font-size: 22px !important;
+    width: 22px !important;
+    height: 22px !important;
+    color: $color-text-secondary;
+  }
+}
+
+.mat-mdc-form-field-type-mat-select {
+  .mat-mdc-form-field-icon-prefix {
+    margin-right: -4px;
+  }
+}
+
+// Button Icon Alignment
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-outlined-button {
+  .mat-icon {
+    margin-right: 8px;
+    margin-left: -4px;
+
+    &[matSuffix] {
+      margin-right: -4px;
+      margin-left: 8px;
+    }
+  }
+}

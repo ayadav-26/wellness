@@ -1,0 +1,52 @@
+<div class="login-page">
+  <div class="login-brand">
+    <div class="brand-name">WellnessHub</div>
+    <div class="brand-tagline">Your sanctuary for holistic healing and management.</div>
+  </div>
+
+  <div class="login-form-panel">
+    <div class="form-title">Welcome Back</div>
+    <div class="form-subtitle">Please enter your details to sign in.</div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email" type="email" />
+        <mat-icon matPrefix>mail</mat-icon>
+        @if (form.get('email')?.hasError('required') && form.get('email')?.touched) {
+        <mat-error>This field is required</mat-error>
+        } @else if (form.get('email')?.hasError('email')) {
+        <mat-error>Please enter a valid email address</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Password</mat-label>
+        <input matInput formControlName="password" [type]="hidePassword() ? 'password' : 'text'" />
+        <mat-icon matPrefix>lock</mat-icon>
+        <button type="button" mat-icon-button matSuffix (click)="togglePassword()">
+          <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        @if (form.get('password')?.hasError('required') && form.get('password')?.touched) {
+        <mat-error>This field is required</mat-error>
+        }
+      </mat-form-field>
+
+      <div class="forgot-password-link">
+        <a routerLink="/forgot-password">Forgot Password?</a>
+      </div>
+
+      <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || loading()">
+        @if (loading()) {
+        <mat-spinner diameter="20"></mat-spinner>
+        } @else {
+        Sign In
+        }
+      </button>
+
+      <div class="auth-footer">
+        Don't have an account? <a routerLink="/register">Register</a>
+      </div>
+    </form>
+  </div>
+</div>

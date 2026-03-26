@@ -1,0 +1,46 @@
+@use 'variables' as *;
+
+// ─── Typography Element Styles ────────────────────────────────────────────────
+// Note: Variables ($font-display, $font-body, $text-*) are defined in _variables.scss
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: $font-display;
+  color: $color-text-primary;
+  line-height: 1.25;
+  margin: 0;
+}
+
+h1 { font-size: $text-4xl; font-weight: 600; }
+h2 { font-size: $text-3xl; font-weight: 500; }
+h3 { font-size: $text-2xl; font-weight: 500; }
+h4 { font-size: $text-xl;  font-weight: 500; }
+h5 { font-size: $text-lg;  font-weight: 500; }
+h6 { font-size: $text-base; font-weight: 600; }
+
+p {
+  font-family: $font-body;
+  font-size: $text-base;
+  color: $color-text-secondary;
+  line-height: 1.6;
+  margin: 0;
+}
+
+a {
+  color: $color-primary;
+  text-decoration: none;
+  transition: color $transition-fast;
+
+  &:hover { color: $color-primary-light; }
+}
+
+label {
+  font-family: $font-body;
+  font-size: $text-sm;
+  font-weight: 500;
+  color: $color-text-secondary;
+}
+
+small {
+  font-size: $text-xs;
+  color: $color-text-muted;
+}

@@ -1,0 +1,169 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+.sidebar {
+  width: $sidebar-width;
+  height: 100vh;
+  background: $sidebar-bg;
+  color: $sidebar-text;
+  display: flex;
+  flex-direction: column;
+  transition: width $transition-base;
+  flex-shrink: 0;
+  overflow: hidden;
+
+  &.collapsed {
+    width: $sidebar-collapsed-width;
+
+    .brand-name,
+    .nav-label,
+    .user-details {
+      display: none;
+    }
+
+    .sidebar-header {
+      padding: $spacing-4 $spacing-2;
+      justify-content: center;
+    }
+
+    .nav-item {
+      padding: $spacing-3;
+      justify-content: center;
+    }
+
+    .user-info {
+      justify-content: center;
+    }
+  }
+}
+
+.sidebar-header {
+  height: $topbar-height;
+  padding: 0 $spacing-5;
+  @include flex-between;
+  border-bottom: 1px solid rgba(white, 0.08);
+
+  .brand {
+    @include flex-center;
+    gap: $spacing-2;
+  }
+
+  .brand-icon {
+    color: $color-accent;
+  }
+
+  .brand-name {
+    font-family: $font-display;
+    font-size: $text-xl;
+    color: $color-accent;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .collapse-btn {
+    background: none;
+    border: none;
+    color: $sidebar-text;
+    cursor: pointer;
+    padding: $spacing-1;
+    border-radius: $border-radius-sm;
+    transition: color $transition-fast;
+
+    &:hover {
+      color: white;
+    }
+  }
+}
+
+.nav-items {
+  flex: 1;
+  padding: $spacing-4 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+  padding: $spacing-4 $spacing-6; /* increased vertical padding */
+  margin-bottom: 4px; /* added small gap between items */
+  color: $sidebar-text;
+  text-decoration: none;
+  font-size: $text-base; /* slightly adjusted font size for better balance */
+  font-weight: 500;
+  transition: background $transition-fast, color $transition-fast;
+  cursor: pointer;
+  white-space: nowrap;
+  border-left: 3px solid transparent;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &:hover {
+    background: $sidebar-hover-bg;
+    color: white;
+  }
+
+  &.active {
+    background: $sidebar-active-bg;
+    color: $sidebar-active-text;
+    border-left-color: $color-accent;
+    font-weight: 500;
+  }
+
+  .nav-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  .nav-label {
+    transition: opacity $transition-base;
+  }
+}
+
+.sidebar-footer {
+  padding: $spacing-4 $spacing-5;
+  border-top: 1px solid rgba(white, 0.08);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: $spacing-3;
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: $color-primary;
+    @include flex-center;
+    color: white;
+    font-size: $text-sm;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .user-details {
+    overflow: hidden;
+
+    .user-name {
+      font-size: $text-sm;
+      color: white;
+      font-weight: 500;
+      @include truncate;
+    }
+
+    .user-role {
+      font-size: $text-xs;
+      color: $sidebar-text;
+      @include truncate;
+    }
+  }
+
+  .hidden {
+    display: none;
+  }
+}

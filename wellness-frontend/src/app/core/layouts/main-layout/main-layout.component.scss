@@ -1,0 +1,23 @@
+@use 'variables' as *;
+
+.layout-container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background: $color-bg;
+}
+
+.main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  transition: width $transition-base;
+}
+
+.content-area {
+  flex: 1;
+  padding: $spacing-8;
+  overflow-y: auto;
+  overflow-x: hidden;
+}

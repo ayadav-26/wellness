@@ -79,9 +79,11 @@ import { TherapyCategory } from '../../../core/models/category.model';
         <button *hasPermission="['Categories', 'edit']" mat-icon-button color="accent" matTooltip="Edit Category" (click)="openForm(row)">
           <mat-icon>edit</mat-icon>
         </button>
-        <button *hasPermission="['Categories', 'delete']" mat-icon-button color="warn" matTooltip="Delete Category" (click)="deleteCategory(row)">
-          <mat-icon>delete</mat-icon>
-        </button>
+       <ng-container *hasPermission="['Categories', 'delete']">
+          <button *ngIf="row.status" mat-icon-button color="warn" matTooltip="Delete Category" (click)="deleteCategory(row)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </ng-container>
       </div>
     </ng-template>
   `,
@@ -127,7 +129,7 @@ export class CategoryListComponent implements OnInit {
   totalCount = signal(0);
   searchControl = new FormControl('');
   statusFilter = new FormControl('true');
-  
+
   currentPage = 1;
   currentLimit = 10;
   columns: TableColumn[] = [];
@@ -164,13 +166,13 @@ export class CategoryListComponent implements OnInit {
     this.loading.set(true);
     const searchVal = this.searchControl.value ? this.searchControl.value.trim() : '';
     const statusVal = this.statusFilter.value;
-    
-    this.service.getAll({ 
-      page: this.currentPage, 
-      limit: this.currentLimit, 
-      search: searchVal, 
+
+    this.service.getAll({
+      page: this.currentPage,
+      limit: this.currentLimit,
+      search: searchVal,
       status: statusVal,
-      includeInactive: true 
+      includeInactive: true
     }).subscribe({
       next: (res) => {
         this.dataSource.data = res.data?.data || [];

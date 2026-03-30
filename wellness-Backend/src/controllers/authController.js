@@ -89,13 +89,13 @@ const authController = {
             // Find active user
             const user = await User.findOne({ where: { email, status: true } });
             if (!user) {
-                return error(res, 'Invalid credentials', 401);
+                return error(res, 'Invalid email', 401);
             }
 
             // Verify password
             const isMatch = await bcrypt.compare(password, user.passwordHash);
             if (!isMatch) {
-                return error(res, 'Invalid credentials', 401);
+                return error(res, 'Invalid password', 401);
             }
 
             // Generate JWT

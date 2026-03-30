@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const { User } = require('../models');
 const { success, error } = require('../utils/responseHelper');
 const ROLES = require('../constants/roles');
+const s3Service = require('../services/s3Service');
 
 /**
  * Super Admin guard — prevents modification of the immutable Super Admin account (userId=1).
@@ -40,6 +41,12 @@ const userController = {
             const salt = await bcrypt.genSalt(10);
             const passwordHash = await bcrypt.hash(password, salt);
 
+            // Handle optional profile image upload
+            let profileImageUrl = null;
+            if (req.file) {
+                profileImageUrl = await s3Service.uploadImage(req.file);
+            }
+
             const newAdmin = await User.create({
                 firstName,
                 lastName,
@@ -49,6 +56,7 @@ const userController = {
                 role: ROLES.ADMIN,
                 centerId: centerId || null,
                 status: true,
+                profileImageUrl
             });
 
             const userData = newAdmin.toJSON();
@@ -84,6 +92,12 @@ const userController = {
             const salt = await bcrypt.genSalt(10);
             const passwordHash = await bcrypt.hash(password, salt);
 
+            // Handle optional profile image upload
+            let profileImageUrl = null;
+            if (req.file) {
+                profileImageUrl = await s3Service.uploadImage(req.file);
+            }
+
             const newRec = await User.create({
                 firstName,
                 lastName,
@@ -93,6 +107,7 @@ const userController = {
                 role: ROLES.RECEPTIONIST,
                 centerId: finalCenterId || null,
                 status: true,
+                profileImageUrl
             });
 
             const userData = newRec.toJSON();
@@ -223,6 +238,15 @@ const userController = {
             } else {
                 // Regular users (or Admins updating themselves via profile) can only update phone
                 if (phoneNumber) updateData.phoneNumber = phoneNumber;
+            }
+
+            // Profile Image Update logic (Allowed for each role to update their own, or by power users)
+            if (req.file) {
+                // If there's an existing image, delete it from S3
+                if (user.profileImageUrl) {
+                    await s3Service.deleteImage(user.profileImageUrl);
+                }
+                updateData.profileImageUrl = await s3Service.uploadImage(req.file);
             }
 
             await user.update(updateData);

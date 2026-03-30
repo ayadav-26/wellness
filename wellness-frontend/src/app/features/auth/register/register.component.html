@@ -1,4 +1,4 @@
-<div class="login-page"> <!-- Reuse login-page layout for consistency -->
+<div class="login-page">
   <div class="login-brand">
     <div class="brand-name">WellnessHub</div>
     <div class="brand-tagline">Start your journey to holistic wellness today.</div>
@@ -49,8 +49,6 @@
         }
       </mat-form-field>
 
-      <!-- Role selection removed: backend forces 'User' role -->
-
       <mat-form-field appearance="outline">
         <mat-label>Password</mat-label>
         <input matInput formControlName="password" [type]="hidePassword() ? 'password' : 'text'" />
@@ -64,6 +62,46 @@
         <mat-error>Min 6 characters required</mat-error>
         }
       </mat-form-field>
+
+      <!-- ── Profile Picture (Optional) ── -->
+      <div class="register-photo-section">
+        <label class="register-photo-label">Profile Picture <span>(Optional)</span></label>
+
+        <div class="register-photo-row">
+          <!-- Circle -->
+          <div class="register-avatar" (click)="fileInput.click()">
+            @if (imagePreview()) {
+              <img [src]="imagePreview()!" alt="Preview" class="register-avatar-img" />
+            } @else {
+              <mat-icon class="register-avatar-icon">account_circle</mat-icon>
+            }
+            <div class="register-avatar-overlay">
+              <mat-icon>photo_camera</mat-icon>
+            </div>
+          </div>
+
+          <div class="register-photo-actions">
+            <input type="file" #fileInput (change)="onFileSelected($event)"
+                   accept="image/jpeg,image/jpg,image/png" style="display:none" />
+            <button type="button" mat-stroked-button color="accent" (click)="fileInput.click()">
+              <mat-icon>upload</mat-icon>
+              {{ imagePreview() ? 'Change' : 'Upload Photo' }}
+            </button>
+            @if (imagePreview()) {
+              <button type="button" mat-button color="warn" (click)="removeImage()">
+                <mat-icon>close</mat-icon> Remove
+              </button>
+            }
+          </div>
+        </div>
+
+        <p class="register-photo-hint">Accepted: JPG, JPEG, PNG · Max 2MB</p>
+        @if (fileError()) {
+          <p class="register-photo-error">
+            <mat-icon>error_outline</mat-icon> {{ fileError() }}
+          </p>
+        }
+      </div>
 
       <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || loading()">
         @if (loading()) {

@@ -62,6 +62,10 @@ const User = sequelize.define('User', {
     resetPasswordExpires: {
         type: DataTypes.DATE,
         allowNull: true
+    },
+    profileImageUrl: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
 }, {
     tableName: 'Users',

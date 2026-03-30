@@ -1,6 +1,7 @@
 const express = require('express');
 const authController = require('../controllers/authController');
 const authMiddleware = require('../middleware/authMiddleware');
+const upload = require('../middleware/upload');
 
 const router = express.Router();
 
@@ -9,7 +10,7 @@ const router = express.Router();
  * @desc    Public self-registration — always creates a USER account
  * @access  Public
  */
-router.post('/register', authController.register);
+router.post('/register', upload.single('profileImage'), authController.register);
 
 /**
  * @route   POST /api/v1/auth/login

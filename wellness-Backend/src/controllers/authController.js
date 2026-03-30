@@ -5,6 +5,7 @@ const { User } = require('../models');
 const { success, error } = require('../utils/responseHelper');
 const notificationService = require('../services/notificationService');
 const ROLES = require('../constants/roles');
+const s3Service = require('../services/s3Service');
 const { Op } = require('sequelize');
 
 /**
@@ -47,6 +48,12 @@ const authController = {
             const salt = await bcrypt.genSalt(10);
             const passwordHash = await bcrypt.hash(password, salt);
 
+            // Handle optional profile image upload
+            let profileImageUrl = null;
+            if (req.file) {
+                profileImageUrl = await s3Service.uploadImage(req.file);
+            }
+
             // Create user — role is always USER
             const newUser = await User.create({
                 firstName,
@@ -56,6 +63,7 @@ const authController = {
                 passwordHash,
                 role: ROLES.USER,
                 status: true,
+                profileImageUrl
             });
 
             const userData = newUser.toJSON();
@@ -111,7 +119,8 @@ const authController = {
                     email:     user.email,
                     phone:     user.phoneNumber,
                     role:      user.role,
-                    centerId:  user.centerId
+                    centerId:  user.centerId,
+                    profileImageUrl: user.profileImageUrl
                 },
             }, 'Login successful');
         } catch (err) {
@@ -139,7 +148,7 @@ const authController = {
         try {
             const user = await User.findOne({
                 where: { userId: req.user.userId },
-                attributes: ['userId', 'firstName', 'lastName', 'email', 'role', 'centerId'],
+                attributes: ['userId', 'firstName', 'lastName', 'email', 'role', 'centerId', 'profileImageUrl'],
             });
 
             if (!user) return error(res, 'User not found', 404);
@@ -166,7 +175,8 @@ const authController = {
                     lastName:  user.lastName,
                     email:     user.email,
                     role:      user.role,
-                    centerId:  user.centerId
+                    centerId:  user.centerId,
+                    profileImageUrl: user.profileImageUrl
                 },
                 permissions: permissions,
                 isSuperAdmin: user.userId === 1,

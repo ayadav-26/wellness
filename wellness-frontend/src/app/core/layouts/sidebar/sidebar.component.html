@@ -21,7 +21,13 @@
 
   <div class="sidebar-footer">
     <div class="user-info">
-      <div class="avatar">{{ user()?.firstName?.charAt(0) || 'U' }}</div>
+      <div class="avatar">
+        @if (user()?.profileImageUrl) {
+          <img [src]="user()?.profileImageUrl" alt="Avatar" class="avatar-img" />
+        } @else {
+          {{ user()?.firstName?.charAt(0) || 'U' }}
+        }
+      </div>
       <div class="user-details" [class.hidden]="collapsed()">
         <div class="user-name">{{ user()?.firstName }} {{ user()?.lastName }}</div>
         <div class="user-role">{{ user()?.role }}</div>

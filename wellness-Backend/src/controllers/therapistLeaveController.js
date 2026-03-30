@@ -20,6 +20,10 @@ const therapistLeaveController = {
             const therapist = await Therapist.findByPk(therapistId);
             if (!therapist) return error(res, "Therapist not found", 404);
 
+            if (req.user && req.user.role === 'Receptionist' && therapist.centerId !== req.user.centerId) {
+                return error(res, "Access denied. Therapist belongs to another center.", 403);
+            }
+
             const leave = await TherapistLeave.create({
                 therapistId,
                 leaveDate,
@@ -45,15 +49,21 @@ const therapistLeaveController = {
             const where = {};
             if (therapistId) where.therapistId = therapistId;
 
+            const includeQuery = [
+                {
+                    model: Therapist,
+                    as: 'therapist',
+                    attributes: ['therapistId', 'firstName', 'lastName', 'centerId']
+                }
+            ];
+
+            if (req.user && req.user.role === 'Receptionist') {
+                includeQuery[0].where = { centerId: req.user.centerId };
+            }
+
             const { count, rows } = await TherapistLeave.findAndCountAll({
                 where,
-                include: [
-                    {
-                        model: Therapist,
-                        as: 'therapist',
-                        attributes: ['therapistId', 'firstName', 'lastName', 'centerId']
-                    }
-                ],
+                include: includeQuery,
                 limit,
                 offset,
                 order: [['leaveDate', 'DESC']]
@@ -79,10 +89,16 @@ const therapistLeaveController = {
     deleteLeave: async (req, res, next) => {
         try {
             const { id } = req.params;
-            const leave = await TherapistLeave.findByPk(id);
+            const leave = await TherapistLeave.findByPk(id, { 
+                include: [{ model: Therapist, as: 'therapist' }] 
+            });
 
             if (!leave) {
                 return error(res, "Leave record not found", 404);
+            }
+
+            if (req.user && req.user.role === 'Receptionist' && leave.therapist.centerId !== req.user.centerId) {
+                return error(res, "Access denied. Cannot delete leave for another center's therapist.", 403);
             }
 
             await leave.destroy();

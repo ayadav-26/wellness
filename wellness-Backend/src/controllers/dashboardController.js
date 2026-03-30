@@ -17,7 +17,12 @@ const dashboardController = {
      */
     getStats: async (req, res, next) => {
         try {
-            const { centerId } = req.query;
+            let { centerId } = req.query;
+
+            // If Receptionist, force centerId to their assigned center
+            if (req.user && req.user.role === 'Receptionist') {
+                centerId = req.user.centerId;
+            }
 
             // ── Date Helpers ──
             const now = new Date();

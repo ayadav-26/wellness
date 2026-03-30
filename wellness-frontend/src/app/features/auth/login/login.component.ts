@@ -49,8 +49,10 @@ export class LoginComponent {
         if (res.success && res.data?.user) {
           const role = res.data.user.role;
           // Navigate based on role — permissions are loaded inside auth.service.login()
-          if (role === 'Super_Admin' || role === 'Admin' || role === 'Receptionist') {
+          if (role === 'Super_Admin' || role === 'Admin') {
             this.router.navigate(['/dashboard']);
+          } else if (role === 'Receptionist') {
+            this.router.navigate(['/centers']);
           } else {
             this.router.navigate(['/bookings']);
           }

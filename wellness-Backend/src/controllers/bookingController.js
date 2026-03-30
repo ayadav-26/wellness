@@ -94,6 +94,10 @@ const bookingController = {
             const center = await Center.findOne({ where: { centerId, status: true } });
             if (!center) return error(res, "Invalid or inactive center", 400);
 
+            if (req.user && req.user.role === 'Receptionist' && centerId != req.user.centerId) {
+                return error(res, "Receptionists can only create bookings for their assigned center", 403);
+            }
+
             const therapy = await TherapyService.findOne({ where: { therapyId, status: true } });
             if (!therapy) return error(res, "Invalid or inactive therapy service", 400);
 
@@ -235,8 +239,11 @@ const bookingController = {
             const where = {};
             if (req.user && req.user.role === 'User') {
                 where.userId = req.user.userId;
+            } else if (req.user && req.user.role === 'Receptionist') {
+                where.centerId = req.user.centerId;
+            } else if (centerId) {
+                where.centerId = centerId;
             }
-            if (centerId) where.centerId = centerId;
             if (therapistId) where.therapistId = therapistId;
             if (bookingStatus) where.bookingStatus = bookingStatus;
             if (customerPhone) where.customerPhone = customerPhone;
@@ -309,6 +316,10 @@ const bookingController = {
                 return error(res, 'Access denied', 403);
             }
 
+            if (req.user.role === 'Receptionist' && booking.centerId !== req.user.centerId) {
+                return error(res, 'Access denied. Booking belongs to another center.', 403);
+            }
+
             return success(res, booking, 'Booking retrieved successfully');
         } catch (err) {
             next(err);
@@ -335,6 +346,10 @@ const bookingController = {
                 const policyError = _checkUserBookingPolicy(booking, 'reschedule');
                 if (policyError) {
                     return res.status(400).json({ success: false, message: policyError, code: 400 });
+                }
+            } else if (req.user && req.user.role === 'Receptionist') {
+                if (booking.centerId !== req.user.centerId) {
+                    return res.status(403).json({ success: false, message: "Access denied. Booking belongs to another center.", code: 403 });
                 }
             }
 
@@ -419,6 +434,10 @@ const bookingController = {
                 if (policyError) {
                     return res.status(400).json({ success: false, message: policyError, code: 400 });
                 }
+            } else if (req.user && req.user.role === 'Receptionist') {
+                if (booking.centerId !== req.user.centerId) {
+                    return res.status(403).json({ success: false, message: "Access denied. Booking belongs to another center.", code: 403 });
+                }
             }
 
             if (booking.bookingStatus === 'Cancelled') {
@@ -460,6 +479,10 @@ const bookingController = {
             const booking = await Booking.findByPk(id);
             if (!booking) return error(res, "Booking not found", 404);
 
+            if (req.user && req.user.role === 'Receptionist' && booking.centerId !== req.user.centerId) {
+                return error(res, "Access denied. Booking belongs to another center.", 403);
+            }
+
             await booking.update({ bookingStatus: status });
 
             return success(res, booking, `Booking status updated to ${status}`);
@@ -478,6 +501,10 @@ const bookingController = {
 
             const booking = await Booking.findByPk(id);
             if (!booking) return error(res, "Booking not found", 404);
+
+            if (req.user && req.user.role === 'Receptionist' && booking.centerId !== req.user.centerId) {
+                return error(res, "Access denied. Booking belongs to another center.", 403);
+            }
 
             // Basic validation for dates if provided
             if (updateData.appointmentStartTime) {

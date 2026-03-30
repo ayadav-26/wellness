@@ -5,7 +5,7 @@ const roleMiddleware = require('../middleware/roleMiddleware');
 
 const router = express.Router();
 
-router.use([authMiddleware, roleMiddleware(['Super_Admin', 'Admin'])]);
+router.use([authMiddleware, roleMiddleware(['Super_Admin', 'Admin', 'Receptionist'])]);
 
 router.get('/stats', dashboardController.getStats);
 

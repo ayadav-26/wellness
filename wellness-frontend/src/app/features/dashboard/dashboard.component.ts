@@ -4,12 +4,18 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { FormsModule } from '@angular/forms';
 import { StatCardComponent } from '../../shared/components/stat-card/stat-card.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
 import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader.component';
 import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { DashboardService, DashboardStats } from '../../core/services/dashboard.service';
+import { CentersService } from '../../core/services/centers.service';
+import { AuthService } from '../../core/services/auth.service';
+import { Center } from '../../core/models/center.model';
 
 @Component({
   selector: 'app-dashboard',
@@ -20,6 +26,9 @@ import { DashboardService, DashboardStats } from '../../core/services/dashboard.
     MatButtonToggleModule,
     MatProgressSpinnerModule,
     MatIconModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    FormsModule,
     StatCardComponent,
     StatusBadgeComponent,
     SkeletonLoaderComponent,
@@ -31,9 +40,14 @@ import { DashboardService, DashboardStats } from '../../core/services/dashboard.
 })
 export class DashboardComponent implements OnInit {
   private dashboardService = inject(DashboardService);
+  private centersService = inject(CentersService);
+  private authService = inject(AuthService);
 
   loading = signal(true);
   error = signal<string | null>(null);
+  centers = signal<Center[]>([]);
+  selectedCenterId = signal<number | null>(null);
+  userRole = signal<string | null>(null);
 
   stats = signal<DashboardStats>({
     bookingsToday: 0,
@@ -70,13 +84,32 @@ export class DashboardComponent implements OnInit {
   };
 
   ngOnInit() {
+    const user = this.authService.getCurrentUser();
+    this.userRole.set(user?.role || null);
+
+    if (['Super_Admin', 'Admin'].includes(user?.role || '')) {
+      this.loadCenters();
+    }
+    
+    this.loadDashboard();
+  }
+
+  loadCenters() {
+    this.centersService.getAll({ limit: 100, status: true }).subscribe({
+      next: (res) => this.centers.set(res.data?.data || []),
+      error: () => console.error('Failed to load centers')
+    });
+  }
+
+  onCenterChange(centerId: number | null) {
+    this.selectedCenterId.set(centerId);
     this.loadDashboard();
   }
 
   loadDashboard() {
     this.loading.set(true);
     this.error.set(null);
-    this.dashboardService.getStats().subscribe({
+    this.dashboardService.getStats(this.selectedCenterId() || undefined).subscribe({
       next: (res) => {
         const data = res.data;
         this.stats.set(data);

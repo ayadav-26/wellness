@@ -20,11 +20,15 @@ const therapistController = {
                 return error(res, "Missing required fields", 400);
             }
 
-            // Validate center
             const center = await Center.findByPk(centerId);
             if (!center || !center.status) {
                 await transaction.rollback();
                 return error(res, "Invalid or inactive center", 400);
+            }
+
+            if (req.user && req.user.role === 'Receptionist' && centerId != req.user.centerId) {
+                await transaction.rollback();
+                return error(res, "Receptionists can only create therapists for their assigned center", 403);
             }
 
             const therapist = await Therapist.create({
@@ -86,7 +90,9 @@ const therapistController = {
                 where.status = true;
             }
 
-            if (centerId) {
+            if (req.user && req.user.role === 'Receptionist') {
+                where.centerId = req.user.centerId;
+            } else if (centerId) {
                 where.centerId = centerId;
             }
 
@@ -170,6 +176,10 @@ const therapistController = {
                 return error(res, "Therapist not found", 404);
             }
 
+            if (req.user && req.user.role === 'Receptionist' && therapist.centerId !== req.user.centerId) {
+                return error(res, "Access denied. Therapist belongs to another center.", 403);
+            }
+
             return success(res, therapist, "Therapist retrieved successfully");
         } catch (err) {
             next(err);
@@ -188,6 +198,11 @@ const therapistController = {
             if (!therapist) {
                 await transaction.rollback();
                 return error(res, "Therapist not found", 404);
+            }
+
+            if (req.user && req.user.role === 'Receptionist' && therapist.centerId !== req.user.centerId) {
+                await transaction.rollback();
+                return error(res, "Access denied. Therapist belongs to another center.", 403);
             }
 
             if (req.body.centerId) {
@@ -252,6 +267,10 @@ const therapistController = {
 
             if (!therapist) {
                 return error(res, "Therapist not found", 404);
+            }
+
+            if (req.user && req.user.role === 'Receptionist' && therapist.centerId !== req.user.centerId) {
+                return error(res, "Access denied. Therapist belongs to another center.", 403);
             }
 
             await therapist.update({ status: false });

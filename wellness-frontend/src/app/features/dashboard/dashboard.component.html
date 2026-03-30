@@ -6,9 +6,21 @@
         <span class="live-dot"></span>Live
       </span>
     </div>
-    <button class="refresh-btn" (click)="loadDashboard()" [disabled]="loading()">
-      <mat-icon>refresh</mat-icon>
-    </button>
+    <div class="header-actions">
+      @if (userRole() === 'Admin' || userRole() === 'Super_Admin') {
+        <mat-form-field appearance="outline" class="center-filter">
+          <mat-select [ngModel]="selectedCenterId()" (ngModelChange)="onCenterChange($event)" placeholder="All Centers">
+            <mat-option [value]="null">All Centers</mat-option>
+            @for (center of centers(); track center.centerId) {
+              <mat-option [value]="center.centerId">{{ center.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+      <button class="refresh-btn" (click)="loadDashboard()" [disabled]="loading()">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
   </div>
 
   @if (loading()) {

@@ -14,6 +14,7 @@ import { TherapistDetailComponent } from '../therapist-detail/therapist-detail.c
 import { TherapistsService } from '../../../core/services/therapists.service';
 import { CentersService } from '../../../core/services/centers.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { HasPermissionDirective } from '../../../core/directives/has-permission.directive';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSelectModule } from '@angular/material/select';
@@ -36,7 +37,7 @@ import { Center } from '../../../core/models/center.model';
     <div class="filters-bar mb-4">
       <div class="search-group">
         <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
-          <mat-label>Search Therapist or Phone Number</mat-label>
+          <mat-label>Search Name or Phone Number</mat-label>
           <input matInput [formControl]="searchControl" placeholder="Enter keyword..." (keyup.enter)="onSearch()">
           <mat-icon matPrefix>search</mat-icon>
           @if (searchControl.value) {
@@ -50,26 +51,28 @@ import { Center } from '../../../core/models/center.model';
         </button>
       </div>
 
-      <div class="right-filters">
-        <mat-form-field appearance="outline" class="filter-field">
-          <mat-label>Filter by Center</mat-label>
-          <mat-select [formControl]="centerControl">
-            <mat-option [value]="null">All Centers</mat-option>
-            @for (c of centers(); track c.centerId) {
-              <mat-option [value]="c.centerId">{{ c.name }}</mat-option>
-            }
-          </mat-select>
-          <mat-icon matPrefix>storefront</mat-icon>
-        </mat-form-field>
+      @if (!isReceptionist()) {
+        <div class="right-filters">
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Filter by Center</mat-label>
+            <mat-select [formControl]="centerControl">
+              <mat-option [value]="null">All Centers</mat-option>
+              @for (c of centers(); track c.centerId) {
+                <mat-option [value]="c.centerId">{{ c.name }}</mat-option>
+              }
+            </mat-select>
+            <mat-icon matPrefix>storefront</mat-icon>
+          </mat-form-field>
 
-        <mat-form-field appearance="outline" class="filter-field status-filter">
-          <mat-label>Status</mat-label>
-          <mat-select [formControl]="statusControl">
-            <mat-option value="active">Active</mat-option>
-            <mat-option value="inactive">Inactive</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
+          <mat-form-field appearance="outline" class="filter-field status-filter">
+            <mat-label>Status</mat-label>
+            <mat-select [formControl]="statusControl">
+              <mat-option value="active">Active</mat-option>
+              <mat-option value="inactive">Inactive</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      }
     </div>
 
     <app-data-table
@@ -192,6 +195,7 @@ export class TherapistListComponent implements OnInit {
 
   private service = inject(TherapistsService);
   private centersService = inject(CentersService);
+  private authService = inject(AuthService);
   private dialog = inject(MatDialog);
   private notify = inject(NotificationService);
 
@@ -258,6 +262,10 @@ export class TherapistListComponent implements OnInit {
     this.centersService.getAll({ limit: 100 }).subscribe(res => {
       this.centers.set(res.data?.data || []);
     });
+  }
+
+  isReceptionist(): boolean {
+    return this.authService.getCurrentUser()?.role === 'Receptionist';
   }
 
   loadData() {

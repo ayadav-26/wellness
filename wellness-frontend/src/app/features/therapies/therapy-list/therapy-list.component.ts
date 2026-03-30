@@ -15,6 +15,7 @@ import { TherapyFormComponent } from '../therapy-form/therapy-form.component';
 import { SkillsManageComponent } from '../skills/skills.component';
 import { TherapiesService } from '../../../core/services/therapies.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { HasPermissionDirective } from '../../../core/directives/has-permission.directive';
 import { DurationFormatPipe } from '../../../core/pipes/duration-format.pipe';
 import { MatTableDataSource } from '@angular/material/table';
@@ -28,9 +29,11 @@ import { Therapy } from '../../../core/models/therapy.model';
     <div class="page-header">
       <h1 class="font-display text-3xl">Therapy Services</h1>
       <div class="header-actions">
-        <button mat-stroked-button color="primary" (click)="openSkills()" class="mr-2">
-          <mat-icon>psychology</mat-icon> Manage Skills
-        </button>
+        @if (!isReceptionist()) {
+          <button mat-stroked-button color="primary" (click)="openSkills()" class="mr-2">
+            <mat-icon>psychology</mat-icon> Manage Skills
+          </button>
+        }
         <button *hasPermission="['Therapies', 'create']" mat-raised-button color="primary" (click)="openForm()">
           <mat-icon>add</mat-icon> Add Therapy
         </button>
@@ -54,16 +57,18 @@ import { Therapy } from '../../../core/models/therapy.model';
         </button>
       </div>
 
-      <div class="right-filters flex items-center gap-4 ml-auto">
-        <mat-form-field appearance="outline" subscriptSizing="dynamic" style="width: 160px;">
-          <mat-label>Status</mat-label>
-          <mat-select [formControl]="statusFilter" (selectionChange)="onSearch()">
-            <mat-option value="all">All Status</mat-option>
-            <mat-option value="true">Active</mat-option>
-            <mat-option value="false">Inactive</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
+      @if (!isReceptionist()) {
+        <div class="right-filters flex items-center gap-4 ml-auto">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" style="width: 160px;">
+            <mat-label>Status</mat-label>
+            <mat-select [formControl]="statusFilter" (selectionChange)="onSearch()">
+              <mat-option value="all">All Status</mat-option>
+              <mat-option value="true">Active</mat-option>
+              <mat-option value="false">Inactive</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      }
     </div>
 
     <app-data-table
@@ -143,6 +148,7 @@ export class TherapyListComponent implements OnInit {
   @ViewChild('catTpl', { static: true }) catTpl!: TemplateRef<any>;
 
   private service = inject(TherapiesService);
+  private authService = inject(AuthService);
   private dialog = inject(MatDialog);
   private notify = inject(NotificationService);
 
@@ -211,6 +217,10 @@ export class TherapyListComponent implements OnInit {
     this.currentPage = event.pageIndex + 1;
     this.currentLimit = event.pageSize;
     this.loadData();
+  }
+
+  isReceptionist(): boolean {
+    return this.authService.getCurrentUser()?.role === 'Receptionist';
   }
 
   openForm(therapy?: Therapy) {

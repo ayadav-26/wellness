@@ -1,4 +1,4 @@
-const { TherapyService, TherapyCategory } = require('../models');
+const { TherapyService, TherapyCategory, Center } = require('../models');
 const { success, error } = require('../utils/responseHelper');
 const { Op } = require('sequelize');
 
@@ -62,18 +62,35 @@ const therapyServiceController = {
                 where.therapyName = { [Op.iLike]: `%${search.trim()}%` };
             }
 
+            const therapyInclude = [
+                {
+                    model: TherapyCategory,
+                    as: 'category',
+                    attributes: ['categoryId', 'categoryName']
+                }
+            ];
+
+            // Enforce center-based filtering for Receptionists
+            if (req.user && req.user.role === 'Receptionist' && req.user.centerId) {
+                therapyInclude[0].include = [
+                    {
+                        model: Center,
+                        as: 'centers',
+                        where: { centerId: req.user.centerId },
+                        through: { attributes: [] },
+                        attributes: []
+                    }
+                ];
+                therapyInclude[0].required = true;
+            }
+
             const { count, rows } = await TherapyService.findAndCountAll({
                 where,
                 attributes: ['therapyId', 'therapyName', 'durationMinutes', 'price', 'status', 'categoryId'],
-                include: [
-                    {
-                        model: TherapyCategory,
-                        as: 'category',
-                        attributes: ['categoryId', 'categoryName']
-                    }
-                ],
+                include: therapyInclude,
                 limit,
                 offset,
+                distinct: true,
                 order: [['therapyName', 'ASC']]
             });
 

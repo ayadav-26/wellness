@@ -175,12 +175,12 @@ const userController = {
 
             const users = await User.findAll({
                 where,
-                attributes: { exclude: ['passwordHash'] },
+                attributes: ['userId', 'firstName', 'lastName', 'email', 'phoneNumber', 'role', 'status', 'centerId', 'profileImageUrl'],
                 include: [
                     {
                         model: require('../models').Center,
                         as: 'center',
-                        attributes: ['centerId', 'name', 'city']
+                        attributes: ['centerId', 'name']
                     }
                 ],
                 order: [['createdAt', 'DESC']],

@@ -265,16 +265,21 @@ const bookingController = {
 
             const { count, rows } = await Booking.findAndCountAll({
                 where,
+                attributes: [
+                    'bookingId', 'centerId', 'therapyId', 'therapistId', 'roomId',
+                    'customerName', 'customerPhone', 'customerEmail',
+                    'appointmentStartTime', 'appointmentEndTime',
+                    'bookingStatus', 'therapistGenderPreference', 'userId'
+                ],
                 include: [
-                    { model: Center, as: 'center', attributes: ['centerId', 'name', 'city'] },
+                    { model: Center, as: 'center', attributes: ['centerId', 'name'] },
                     {
                         model: TherapyService,
                         as: 'therapy',
-                        attributes: ['therapyId', 'therapyName', 'durationMinutes', 'price'],
-                        include: [{ model: TherapyCategory, as: 'category', attributes: ['categoryId', 'categoryName'] }]
+                        attributes: ['therapyId', 'therapyName', 'durationMinutes', 'price']
                     },
                     { model: Therapist, as: 'therapist', attributes: ['therapistId', 'firstName', 'lastName', 'gender'] },
-                    { model: Room, as: 'room', attributes: ['roomId', 'roomName', 'roomType'] }
+                    { model: Room, as: 'room', attributes: ['roomId', 'roomName'] }
                 ],
                 limit: l,
                 offset: offset,
@@ -304,8 +309,13 @@ const bookingController = {
             const booking = await Booking.findOne({
                 where: { bookingId: id },
                 include: [
-                    { model: TherapyService, as: 'therapy' },
-                    { model: Center, as: 'center' },
+                    { model: Center, as: 'center', attributes: ['centerId', 'name', 'city', 'contactNumber'] },
+                    {
+                        model: TherapyService, as: 'therapy',
+                        include: [{ model: TherapyCategory, as: 'category', attributes: ['categoryId', 'categoryName'] }]
+                    },
+                    { model: Therapist, as: 'therapist', attributes: ['therapistId', 'firstName', 'lastName', 'gender', 'phoneNumber'] },
+                    { model: Room, as: 'room', attributes: ['roomId', 'roomName', 'roomType'] }
                 ]
             });
 

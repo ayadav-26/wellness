@@ -64,6 +64,7 @@ const therapyServiceController = {
 
             const { count, rows } = await TherapyService.findAndCountAll({
                 where,
+                attributes: ['therapyId', 'therapyName', 'durationMinutes', 'price', 'status', 'categoryId'],
                 include: [
                     {
                         model: TherapyCategory,

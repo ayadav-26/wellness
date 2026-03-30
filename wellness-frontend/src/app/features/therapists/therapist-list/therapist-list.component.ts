@@ -18,12 +18,13 @@ import { HasPermissionDirective } from '../../../core/directives/has-permission.
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Center } from '../../../core/models/center.model';
 
 @Component({
   selector: 'app-therapist-list',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, MatInputModule, MatDialogModule, MatSelectModule, MatTooltipModule, ReactiveFormsModule, DataTableComponent, StatusBadgeComponent, HasPermissionDirective],
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatInputModule, MatDialogModule, MatSelectModule, MatTooltipModule, MatProgressSpinnerModule, ReactiveFormsModule, DataTableComponent, StatusBadgeComponent, HasPermissionDirective],
   template: `
     <div class="page-header">
       <h1 class="font-display text-3xl">Therapists</h1>
@@ -83,9 +84,12 @@ import { Center } from '../../../core/models/center.model';
     </app-data-table>
 
     <ng-template #nameTpl let-row="row">
-      <a class="name-link" (click)="viewDetail(row)">
-        {{ row.firstName }} {{ row.lastName }}
-      </a>
+      <button class="name-link" (click)="viewDetail(row)" [disabled]="detailLoading()">
+        <span>{{ row.firstName }} {{ row.lastName }}</span>
+        @if (detailLoading() && activeDetailId() === row.therapistId) {
+          <mat-spinner diameter="14" style="display:inline-block"></mat-spinner>
+        }
+      </button>
     </ng-template>
 
     <ng-template #statusTpl let-status>
@@ -138,8 +142,27 @@ import { Center } from '../../../core/models/center.model';
       line-height: 20px !important;
       display: block !important;
     }
-    .name-link { color: #2C5F5D; font-weight: 500; cursor: pointer; text-decoration: none; transition: color 0.2s; }
-    .name-link:hover { color: #C9A96E; text-decoration: underline; }
+    .name-link {
+      /* Reset default <button> browser styles */
+      background: none;
+      border: none;
+      padding: 0;
+      margin: 0;
+      font-family: inherit;
+      font-size: inherit;
+      line-height: inherit;
+      /* Link look */
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #2C5F5D;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .name-link:hover:not([disabled]) { color: #C9A96E; text-decoration: underline; }
+    .name-link[disabled] { cursor: default; opacity: 0.7; }
 
     .center-name-tag {
       display: inline-flex;
@@ -173,6 +196,8 @@ export class TherapistListComponent implements OnInit {
   private notify = inject(NotificationService);
 
   loading = signal(true);
+  detailLoading = signal(false);
+  activeDetailId = signal<number | null>(null);
   dataSource = new MatTableDataSource<any>([]);
   totalCount = signal(0);
   searchControl = new FormControl('');
@@ -280,9 +305,24 @@ export class TherapistListComponent implements OnInit {
   }
 
   viewDetail(therapist: any) {
-    this.dialog.open(TherapistDetailComponent, {
-      width: '640px',
-      data: therapist
+    if (this.detailLoading()) return;
+    this.detailLoading.set(true);
+    this.activeDetailId.set(therapist.therapistId);
+
+    this.service.getById(therapist.therapistId).subscribe({
+      next: (res) => {
+        this.detailLoading.set(false);
+        this.activeDetailId.set(null);
+        this.dialog.open(TherapistDetailComponent, {
+          width: '640px',
+          data: res.data
+        });
+      },
+      error: () => {
+        this.detailLoading.set(false);
+        this.activeDetailId.set(null);
+        this.notify.error('Failed to load therapist details.');
+      }
     });
   }
 

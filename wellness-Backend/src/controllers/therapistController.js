@@ -106,16 +106,12 @@ const therapistController = {
 
             const { count, rows } = await Therapist.findAndCountAll({
                 where,
+                attributes: ['therapistId', 'firstName', 'lastName', 'gender', 'phoneNumber', 'experienceYears', 'status', 'centerId'],
                 include: [
                     {
                         model: Center,
                         as: 'center',
-                        attributes: ['centerId', 'name', 'city']
-                    },
-                    {
-                        model: WorkingHours,
-                        as: 'workingHours',
-                        attributes: ['dayOfWeek', 'slots']
+                        attributes: ['centerId', 'name']
                     }
                 ],
                 limit,

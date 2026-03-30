@@ -54,6 +54,7 @@ const therapyCategoryController = {
 
             const { count, rows } = await TherapyCategory.findAndCountAll({
                 where,
+                attributes: ['categoryId', 'categoryName','description', 'status'],
                 limit,
                 offset,
                 order: [['categoryName', 'ASC']]

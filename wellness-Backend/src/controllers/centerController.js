@@ -202,7 +202,7 @@ const centerController = {
 
     listCenters: async (req, res, next) => {
         try {
-            let { page = 1, limit = 10, includeInactive = false, city, hasAvailability, search } = req.query;
+            let { page = 1, limit = 10, includeInactive = false, city, search } = req.query;
 
             page = parseInt(page);
             limit = parseInt(limit);
@@ -214,7 +214,7 @@ const centerController = {
 
             const where = {};
 
-            if (!(includeInactive === 'true' && req.user.role === 'Admin')) {
+            if (!(includeInactive === 'true' && (req.user.role === 'Admin' || req.user.role === 'Super_Admin'))) {
                 where.status = true;
             }
 
@@ -232,39 +232,14 @@ const centerController = {
 
             const { count, rows } = await Center.findAndCountAll({
                 where,
+                attributes: ['centerId', 'name', 'city', 'contactNumber', 'region', 'openingTime', 'closingTime', 'openDays', 'status'],
                 limit,
                 offset,
-                order: [['createdAt', 'DESC']],
-                include: [
-                    {
-                        model: TherapyCategory,
-                        as: 'therapyCategories',
-                        where: { status: true },
-                        required: false,
-                        through: { attributes: [] },
-                        attributes: ['categoryId', 'categoryName']
-                    }
-                ]
+                order: [['createdAt', 'DESC']]
             });
 
-            const slotService = require('../services/slotService');
-
-            const centersWithAvailability = await Promise.all(
-                rows.map(async (center) => {
-                    const data = center.toJSON();
-                    data.hasAvailabilityToday = await slotService.computeCenterAvailabilityToday(center.centerId);
-                    return data;
-                })
-            );
-
-            let finalData = centersWithAvailability;
-
-            if (hasAvailability === 'true') {
-                finalData = finalData.filter(c => c.hasAvailabilityToday);
-            }
-
             return success(res, {
-                data: finalData,
+                data: rows,
                 pagination: {
                     page,
                     limit,

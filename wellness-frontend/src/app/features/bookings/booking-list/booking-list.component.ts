@@ -19,6 +19,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CentersService } from '../../../core/services/centers.service';
 import { BookingDetailDialogComponent } from '../booking-detail-dialog/booking-detail-dialog.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -42,7 +43,8 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/compo
     MatDatepickerModule,
     MatNativeDateModule,
     MatDialogModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatProgressSpinnerModule
   ],
   template: `
     <div class="page-header">
@@ -134,11 +136,13 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/compo
       emptyMessage="No bookings available.">
     </app-data-table>
 
-    <!-- Templates -->
     <ng-template #customerTpl let-row="row">
-      <a href="javascript:void(0)" (click)="openBookingDetail(row)" class="customer-link">
-        {{ row.customerName }}
-      </a>
+      <button class="customer-link" (click)="openBookingDetail(row)" [disabled]="detailLoading() && activeDetailId() === row.bookingId">
+        <span>{{ row.customerName }}</span>
+        @if (detailLoading() && activeDetailId() === row.bookingId) {
+          <mat-spinner diameter="12" style="display:inline-block"></mat-spinner>
+        }
+      </button>
     </ng-template>
 
     <ng-template #statusTpl let-status>
@@ -224,11 +228,25 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/compo
     }
     .right-filters { display: flex; gap: 16px; margin-left: auto; flex-wrap: wrap; }
     .filter-actions { display: flex; align-items: center; }
-    .customer-link { 
-      color: #2C5F5D; 
-      text-decoration: none; 
+    .customer-link {
+      /* Reset button styles */
+      background: none;
+      border: none;
+      padding: 0;
+      margin: 0;
+      font-family: inherit;
+      font-size: inherit;
+      /* Link look */
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #2C5F5D;
+      text-decoration: none;
       font-weight: 600;
-      &:hover { text-decoration: underline; color: #1E3A38; }
+      cursor: pointer;
+      transition: color 0.2s;
+      &:hover:not([disabled]) { text-decoration: underline; color: #1E3A38; }
+      &[disabled] { cursor: default; opacity: 0.7; }
     }
     
     .text-success { color: #2E7D32; }
@@ -251,6 +269,8 @@ export class BookingListComponent implements OnInit {
   private router = inject(Router);
 
   loading = signal(false);
+  detailLoading = signal(false);
+  activeDetailId = signal<number | null>(null);
   dataSource = new MatTableDataSource<any>([]);
   totalCount = signal(0);
 
@@ -305,16 +325,39 @@ export class BookingListComponent implements OnInit {
   }
 
   openBookingDetail(row: any) {
-    const dialogRef = this.dialog.open(BookingDetailDialogComponent, {
-      width: '750px',
-      maxWidth: '90vw',
-      data: row,
-      autoFocus: false
-    });
+    if (this.detailLoading()) return;
+    this.detailLoading.set(true);
+    this.activeDetailId.set(row.bookingId);
 
-    dialogRef.afterClosed().subscribe(res => {
-      if (res === 'cancel') {
-        this.onCancel(row);
+    this.service.getById(row.bookingId).subscribe({
+      next: (res) => {
+        this.detailLoading.set(false);
+        this.activeDetailId.set(null);
+
+        // Flatten therapy fields for the dialog (it reads data.therapyName / data.price)
+        const detail = {
+          ...res.data,
+          therapyName: res.data.therapy?.therapyName || row.therapyName || 'N/A',
+          price: res.data.therapy?.price || 0
+        };
+
+        const dialogRef = this.dialog.open(BookingDetailDialogComponent, {
+          width: '750px',
+          maxWidth: '90vw',
+          data: detail,
+          autoFocus: false
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+          if (result === 'cancel') {
+            this.onCancel(row);
+          }
+        });
+      },
+      error: () => {
+        this.detailLoading.set(false);
+        this.activeDetailId.set(null);
+        this.notify.error('Failed to load booking details.');
       }
     });
   }

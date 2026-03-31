@@ -112,7 +112,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   `,
   styles: [`
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    h1 { color: #1A1A1A; margin: 0; font-family: 'Cormorant Garamond', serif; }
+    h1 { color: #1A1A1A; margin: 0; }
     .search-field { width: 100%; max-width: 400px; }
     .filters-bar { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
     .actions-cell { display: flex; gap: 4px; }

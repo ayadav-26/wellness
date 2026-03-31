@@ -24,7 +24,7 @@ import { TimePickerComponent } from '../../../shared/components/time-picker/time
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatButtonModule, MatInputModule, MatSelectModule, MatProgressSpinnerModule, MatTabsModule, MatIconModule, MatTooltipModule, MatDividerModule, TimePickerComponent],
   template: `
-    <h2 mat-dialog-title>{{ data ? 'Edit Therapist' : 'Add Therapist' }}</h2>
+    <h2 mat-dialog-title class="font-display">{{ data ? 'Edit Therapist' : 'Add Therapist' }}</h2>
     <mat-dialog-content>
       <mat-tab-group>
         <mat-tab label="General Info">
@@ -65,6 +65,13 @@ import { TimePickerComponent } from '../../../shared/components/time-picker/time
               <mat-form-field appearance="outline" style="flex: 0.7;">
                 <mat-label>Phone Number</mat-label>
                 <input matInput formControlName="phoneNumber" maxlength="10" placeholder="10-digit number" />
+                @if (form.get('phoneNumber')?.hasError('required') && (form.get('phoneNumber')?.touched || form.get('phoneNumber')?.dirty)) {
+                  <mat-error>Required</mat-error>
+                } @else if (form.get('phoneNumber')?.hasError('invalidPhone') && (form.get('phoneNumber')?.touched || form.get('phoneNumber')?.dirty)) {
+                  <mat-error>Invalid 10-digit number</mat-error>
+                } @else if (form.get('phoneNumber')?.hasError('invalidStart') && (form.get('phoneNumber')?.touched || form.get('phoneNumber')?.dirty)) {
+                  <mat-error>Must start with 6, 7, 8, or 9</mat-error>
+                }
               </mat-form-field>
             </div>
 
@@ -260,7 +267,7 @@ export class TherapistFormComponent implements OnInit {
 
     if (this.data && this.data.therapistId) {
       this.loading.set(true);
-      this.service.getById(this.data.therapistId).subscribe({
+      this.service.getById(this.data.therapistId, true).subscribe({
         next: (res) => {
           this.loading.set(false);
           if (res.data) {

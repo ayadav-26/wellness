@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { CustomValidators } from '../../core/validators/custom.validators';
 import { AuthService } from '../../core/services/auth.service';
 import { UserService } from '../../core/services/user.service';
 import { NotificationService } from '../../core/services/notification.service';
@@ -23,7 +24,7 @@ import { ImageCropperDialogComponent } from '../../shared/components/image-cropp
   ],
   template: `
     <div class="page-header">
-      <h1>My Profile</h1>
+      <h1 class="font-display text-3xl">My Profile</h1>
       <p class="text-secondary">View and manage your account information</p>
     </div>
 
@@ -99,6 +100,13 @@ import { ImageCropperDialogComponent } from '../../shared/components/image-cropp
                 <input matInput formControlName="phone">
                 <mat-icon matPrefix>phone</mat-icon>
                 <mat-hint>Only contact number can be updated</mat-hint>
+                @if (profileForm.get('phone')?.hasError('required') && (profileForm.get('phone')?.touched || profileForm.get('phone')?.dirty)) {
+                  <mat-error>Required</mat-error>
+                } @else if (profileForm.get('phone')?.hasError('invalidPhone') && (profileForm.get('phone')?.touched || profileForm.get('phone')?.dirty)) {
+                  <mat-error>Invalid 10-digit number</mat-error>
+                } @else if (profileForm.get('phone')?.hasError('invalidStart') && (profileForm.get('phone')?.touched || profileForm.get('phone')?.dirty)) {
+                  <mat-error>Must start with 6, 7, 8, or 9</mat-error>
+                }
               </mat-form-field>
             </div>
 
@@ -136,7 +144,7 @@ import { ImageCropperDialogComponent } from '../../shared/components/image-cropp
   `,
   styles: [`
     .page-header { margin-bottom: 28px; }
-    h1 { color: #1A1A1A; margin: 0; font-size: 28px; font-weight: 700; font-family: 'Outfit', sans-serif; }
+    h1 { color: #1A1A1A; margin: 0; }
     .text-secondary { color: #777; margin: 4px 0 0; }
 
     .profile-layout { display: flex; justify-content: center; }
@@ -307,7 +315,7 @@ export class ProfileComponent implements OnInit {
     firstName: [{ value: '', disabled: true }],
     lastName: [{ value: '', disabled: true }],
     email: [{ value: '', disabled: true }],
-    phone: ['', [Validators.required, Validators.pattern(/^[0-9+() -]{8,20}$/)]]
+    phone: ['', [Validators.required, CustomValidators.phoneNumber()]]
   });
 
   ngOnInit() {

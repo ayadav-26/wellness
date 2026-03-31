@@ -127,7 +127,7 @@ export class TherapyFormComponent implements OnInit {
 
     if (this.data && this.data.therapyId) {
       this.loading.set(true);
-      this.service.getById(this.data.therapyId).subscribe({
+      this.service.getById(this.data.therapyId, true).subscribe({
         next: (res) => {
           this.loading.set(false);
           if (res.data) {

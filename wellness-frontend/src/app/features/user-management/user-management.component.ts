@@ -100,7 +100,7 @@ import { PermissionManagementComponent } from './permission-management/permissio
   `,
   styles: [`
     .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
-    .page-header h1 { margin: 0; font-family: 'Cormorant Garamond', serif; color: #1E3A38; font-weight: 700; }
+    .page-header h1 { margin: 0; color: #1E3A38; font-weight: 700; }
     .text-muted { color: #666; margin-top: 2px; }
     
     .filter-field { width: 300px; }

@@ -10,5 +10,5 @@ export interface Therapy {
   description?: string;
   requiredRoomType: string;
   requiredSkill: string;
-  isActive: boolean;
+  status: boolean;
 }

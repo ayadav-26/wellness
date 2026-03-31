@@ -8,6 +8,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { DataTableComponent, TableColumn } from '../../../shared/components/data-table/data-table.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -21,7 +22,7 @@ import { TherapyCategory } from '../../../core/models/category.model';
 @Component({
   selector: 'app-category-list',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, MatInputModule, MatSelectModule, ReactiveFormsModule, MatTooltipModule, DataTableComponent, StatusBadgeComponent, HasPermissionDirective],
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatInputModule, MatSelectModule, ReactiveFormsModule, MatTooltipModule, DataTableComponent, StatusBadgeComponent, HasPermissionDirective, MatSlideToggleModule],
   template: `
     <div class="page-header">
       <h1 class="font-display text-3xl">Therapy Categories</h1>
@@ -76,20 +77,27 @@ import { TherapyCategory } from '../../../core/models/category.model';
 
     <ng-template #actionsTpl let-row="row">
       <div class="actions-cell">
-        <button *hasPermission="['Categories', 'edit']" mat-icon-button color="accent" matTooltip="Edit Category" (click)="openForm(row)">
-          <mat-icon>edit</mat-icon>
-        </button>
-       <ng-container *hasPermission="['Categories', 'delete']">
-          <button *ngIf="row.status" mat-icon-button color="warn" matTooltip="Delete Category" (click)="deleteCategory(row)">
-            <mat-icon>delete</mat-icon>
+        <!-- Show Edit only for ACTIVE -->
+        @if (row.status) {
+          <button *hasPermission="['Categories', 'edit']" mat-icon-button color="accent" matTooltip="Edit Category" (click)="openForm(row)">
+            <mat-icon>edit</mat-icon>
           </button>
-        </ng-container>
+        }
+        
+        <!-- Toggle for Status (Active/Inactive) -->
+        <mat-slide-toggle 
+          *hasPermission="['Categories', 'edit']" 
+          [checked]="row.status" 
+          (change)="toggleCategoryStatus(row)"
+          [matTooltip]="row.status ? 'Deactivate Category' : 'Activate to edit'"
+          class="compact-toggle">
+        </mat-slide-toggle>
       </div>
     </ng-template>
   `,
   styles: [`
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    h1 { color: #1A1A1A; margin: 0; font-family: 'Cormorant Garamond', serif; }
+    h1 { color: #1A1A1A; margin: 0; }
     .filters-bar { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
     .search-group { display: flex; align-items: center; gap: 8px; flex: 1; max-width: 450px; }
     .search-field { width: 100%; max-width: 400px; }
@@ -113,7 +121,11 @@ import { TherapyCategory } from '../../../core/models/category.model';
       line-height: 20px !important;
       display: block !important;
     }
-    .actions-cell { display: flex; gap: 4px; }
+    .actions-cell { display: flex; gap: 8px; align-items: center; }
+    .compact-toggle {
+      transform: scale(0.8);
+      transform-origin: center;
+    }
   `]
 })
 export class CategoryListComponent implements OnInit {
@@ -199,14 +211,53 @@ export class CategoryListComponent implements OnInit {
   deleteCategory(category: TherapyCategory) {
     const ref = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
-      data: { title: 'Delete', message: `Delete category ${category.categoryName}?`, confirmLabel: 'Delete', confirmColor: 'warn' }
+      data: { title: 'Deactivate', message: `Are you sure you want to deactivate ${category.categoryName}?`, confirmLabel: 'Deactivate', confirmColor: 'warn' }
     });
     ref.afterClosed().subscribe(res => {
       if (res) {
         this.service.delete(category.categoryId).subscribe(() => {
-          this.notify.success('Deleted successfully');
+          this.notify.success('Deactivated successfully');
           this.loadData();
         });
+      }
+    });
+  }
+
+  toggleCategoryStatus(category: TherapyCategory) {
+    if (category.status) {
+      // Deactivation: Show confirmation
+      const ref = this.dialog.open(ConfirmDialogComponent, {
+        width: '400px',
+        data: { 
+          title: 'Deactivate Category', 
+          message: `Are you sure you want to deactivate ${category.categoryName}?`, 
+          confirmLabel: 'Deactivate', 
+          confirmColor: 'warn' 
+        }
+      });
+      ref.afterClosed().subscribe(res => {
+        if (res) {
+          this.performStatusUpdate(category, false);
+        } else {
+          this.loadData(); // Reset toggle state if cancelled
+        }
+      });
+    } else {
+      // Activation: Direct update
+      this.performStatusUpdate(category, true);
+    }
+  }
+
+  private performStatusUpdate(category: TherapyCategory, newStatus: boolean) {
+    this.service.update(category.categoryId, { status: newStatus }).subscribe({
+      next: () => {
+        const action = newStatus ? 'activated' : 'deactivated';
+        this.notify.success(`Category "${category.categoryName}" ${action} successfully`);
+        this.loadData();
+      },
+      error: (err) => {
+        this.notify.error(err?.error?.message || `Failed to ${newStatus ? 'activate' : 'deactivate'}`);
+        this.loadData(); // Reset toggle state
       }
     });
   }

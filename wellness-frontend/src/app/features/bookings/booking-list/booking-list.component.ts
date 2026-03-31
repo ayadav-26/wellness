@@ -187,7 +187,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/compo
   `,
   styles: [`
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    h1 { color: #1A1A1A; margin: 0; font-family: 'Cormorant Garamond', serif; }
+    h1 { color: #1A1A1A; margin: 0; }
     
     .filters-bar { 
       display: flex; 

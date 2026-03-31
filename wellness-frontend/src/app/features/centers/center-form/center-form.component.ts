@@ -21,6 +21,8 @@ import { FormArray } from '@angular/forms';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-center-form',
@@ -41,12 +43,18 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     TimePickerComponent
   ],
   template: `
-    <h2 mat-dialog-title>{{ data ? 'Edit Center' : 'Create Center' }}</h2>
+    <div class="dialog-header">
+      <h2 mat-dialog-title class="font-display">{{ data ? 'Edit Center' : 'Create Center' }}</h2>
+      <button mat-icon-button mat-dialog-close class="close-btn">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
 
     <mat-dialog-content>
-      <mat-tab-group>
+      <mat-tab-group #tabGroup>
         <mat-tab label="General Info">
           <form [formGroup]="form" class="flex-form p-4">
+            <!-- (Form contents remain same) -->
             <mat-form-field appearance="outline">
               <mat-label>Center Name</mat-label>
               <input matInput formControlName="name" maxlength="50" />
@@ -72,6 +80,13 @@ import { MatTooltipModule } from '@angular/material/tooltip';
               <mat-form-field appearance="outline" style="flex: 0 0 300px;">
                 <mat-label>Contact Number</mat-label>
                 <input matInput formControlName="contactNumber" maxlength="10" />
+                @if (form.get('contactNumber')?.hasError('required') && (form.get('contactNumber')?.touched || form.get('contactNumber')?.dirty)) {
+                  <mat-error>Required</mat-error>
+                } @else if (form.get('contactNumber')?.hasError('invalidPhone') && (form.get('contactNumber')?.touched || form.get('contactNumber')?.dirty)) {
+                  <mat-error>Invalid 10-digit number</mat-error>
+                } @else if (form.get('contactNumber')?.hasError('invalidStart') && (form.get('contactNumber')?.touched || form.get('contactNumber')?.dirty)) {
+                  <mat-error>Must start with 6, 7, 8, or 9</mat-error>
+                }
               </mat-form-field>
             </div>
 
@@ -147,7 +162,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
                     <div class="actions-row-only">
                       <button mat-icon-button color="warn" type="button" (click)="removeRoom(i)" matTooltip="Remove room" class="delete-btn">
-                        <mat-icon>delete_outline</mat-icon>
+                        <mat-icon>remove_circle_outline</mat-icon>
                       </button>
                     </div>
                   </div>
@@ -174,13 +189,43 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     </mat-dialog-content>
 
     <mat-dialog-actions align="end">
-      <button mat-stroked-button mat-dialog-close>Cancel</button>
-      <button mat-raised-button color="primary" [disabled]="form.invalid || loading()" (click)="submit()">
-        @if (loading()) { <mat-spinner diameter="18"></mat-spinner> } @else { Save }
-      </button>
+      <!-- Back button if on Rooms tab -->
+      @if (tabGroup.selectedIndex === 1) {
+        <button mat-stroked-button (click)="tabGroup.selectedIndex = 0">
+          <mat-icon iconPositionStart>arrow_back</mat-icon>
+          Back
+        </button>
+      }
+      
+      <!-- Show Next on Tab 0 -->
+      @if (tabGroup.selectedIndex === 0) {
+        <button mat-raised-button color="primary" 
+                [disabled]="!isGeneralInfoValid()" 
+                (click)="nextTab(tabGroup)">
+          Next
+          <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+        </button>
+      }
+
+      <!-- Show Save on Tab 1 -->
+      @if (tabGroup.selectedIndex === 1) {
+        <button mat-raised-button color="primary" 
+                [disabled]="form.invalid || rooms.length === 0 || loading()" 
+                (click)="submit()">
+          @if (loading()) { <mat-spinner diameter="18"></mat-spinner> } @else { Save }
+        </button>
+      }
     </mat-dialog-actions>
   `,
   styles: [`
+    .dialog-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-right: 8px;
+    }
+    .dialog-header h2 { margin-bottom: 0 !important; }
+    .close-btn { color: #666; }
     .flex-form {
       display: flex;
       flex-direction: column;
@@ -484,6 +529,7 @@ export class CenterFormComponent implements OnInit {
   private centersService = inject(CentersService);
   private categoriesService = inject(CategoriesService);
   private notify = inject(NotificationService);
+  private matDialog = inject(MatDialog);
 
   loading = signal(false);
   loadingCategories = signal(false);
@@ -539,7 +585,33 @@ export class CenterFormComponent implements OnInit {
   }
 
   removeRoom(index: number) {
-    this.rooms.removeAt(index);
+    const dialogRef = this.matDialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Remove Room',
+        message: 'Are you sure you want to remove this room?',
+        confirmLabel: 'Remove',
+        confirmColor: 'warn'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.rooms.removeAt(index);
+        this.form.markAsDirty();
+      }
+    });
+  }
+
+  isGeneralInfoValid(): boolean {
+    const controls = ['name', 'address', 'city', 'contactNumber', 'region', 'openingTime', 'closingTime', 'openDays'];
+    return controls.every(c => this.form.get(c)?.valid);
+  }
+
+  nextTab(tabGroup: any) {
+    if (this.isGeneralInfoValid()) {
+      tabGroup.selectedIndex = 1;
+    }
   }
 
   ngOnInit() {

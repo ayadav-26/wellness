@@ -8,6 +8,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { DataTableComponent, TableColumn } from '../../../shared/components/data-table/data-table.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -24,13 +25,13 @@ import { Therapy } from '../../../core/models/therapy.model';
 @Component({
   selector: 'app-therapy-list',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, MatInputModule, MatSelectModule, ReactiveFormsModule, MatTooltipModule, DataTableComponent, StatusBadgeComponent, HasPermissionDirective, DurationFormatPipe, CurrencyPipe],
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatInputModule, MatSelectModule, ReactiveFormsModule, MatTooltipModule, DataTableComponent, StatusBadgeComponent, HasPermissionDirective, DurationFormatPipe, CurrencyPipe, MatSlideToggleModule],
   template: `
     <div class="page-header">
       <h1 class="font-display text-3xl">Therapy Services</h1>
       <div class="header-actions">
         @if (!isReceptionist()) {
-          <button mat-stroked-button color="primary" (click)="openSkills()" class="mr-2">
+          <button mat-stroked-button color="primary" (click)="openSkills()" class="mr-2 bg-white">
             <mat-icon>psychology</mat-icon> Manage Skills
           </button>
         }
@@ -100,12 +101,21 @@ import { Therapy } from '../../../core/models/therapy.model';
 
     <ng-template #actionsTpl let-row="row">
       <div class="actions-cell">
-        <button *hasPermission="['Therapies', 'edit']" mat-icon-button color="accent" matTooltip="Edit Therapy" (click)="openForm(row)">
-          <mat-icon>edit</mat-icon>
-        </button>
-        <button *hasPermission="['Therapies', 'delete']" mat-icon-button color="warn" matTooltip="Delete Therapy" (click)="deleteTherapy(row)">
-          <mat-icon>delete</mat-icon>
-        </button>
+        <!-- Show Edit only for ACTIVE -->
+        @if (row.status) {
+          <button *hasPermission="['Therapies', 'edit']" mat-icon-button color="accent" matTooltip="Edit Therapy" (click)="openForm(row)">
+            <mat-icon>edit</mat-icon>
+          </button>
+        }
+
+        <!-- Toggle for Status (Active/Inactive) -->
+        <mat-slide-toggle 
+          *hasPermission="['Therapies', 'edit']" 
+          [checked]="row.status" 
+          (change)="toggleStatus(row)"
+          [matTooltip]="row.status ? 'Deactivate Therapy' : 'Activate to edit'"
+          class="compact-toggle">
+        </mat-slide-toggle>
       </div>
     </ng-template>
   `,
@@ -136,8 +146,13 @@ import { Therapy } from '../../../core/models/therapy.model';
       line-height: 20px !important;
       display: block !important;
     }
-    .actions-cell { display: flex; gap: 4px; }
+    .actions-cell { display: flex; gap: 8px; align-items: center; }
+    .compact-toggle {
+      transform: scale(0.8);
+      transform-origin: center;
+    }
     .mr-2 { margin-right: 8px; }
+    .bg-white { background-color: #fff !important; }
   `]
 })
 export class TherapyListComponent implements OnInit {
@@ -236,17 +251,41 @@ export class TherapyListComponent implements OnInit {
     });
   }
 
-  deleteTherapy(therapy: Therapy) {
-    const ref = this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      data: { title: 'Delete', message: `Delete therapy ${therapy.therapyName}?`, confirmLabel: 'Delete', confirmColor: 'warn' }
-    });
-    ref.afterClosed().subscribe(res => {
-      if (res) {
-        this.service.delete(therapy.therapyId).subscribe(() => {
-          this.notify.success('Deleted successfully');
-          this.loadData();
-        });
+  toggleStatus(therapy: Therapy) {
+    if (therapy.status) {
+      // Deactivation: Show confirmation
+      const ref = this.dialog.open(ConfirmDialogComponent, {
+        width: '400px',
+        data: { 
+          title: 'Deactivate Therapy', 
+          message: `Are you sure you want to deactivate ${therapy.therapyName}?`, 
+          confirmLabel: 'Deactivate', 
+          confirmColor: 'warn' 
+        }
+      });
+      ref.afterClosed().subscribe(res => {
+        if (res) {
+          this.performStatusUpdate(therapy, false);
+        } else {
+          this.loadData(); // Reset toggle state if cancelled
+        }
+      });
+    } else {
+      // Activation: Direct update
+      this.performStatusUpdate(therapy, true);
+    }
+  }
+
+  private performStatusUpdate(therapy: Therapy, newStatus: boolean) {
+    this.service.update(therapy.therapyId, { status: newStatus }).subscribe({
+      next: () => {
+        const action = newStatus ? 'activated' : 'deactivated';
+        this.notify.success(`Therapy "${therapy.therapyName}" ${action} successfully`);
+        this.loadData();
+      },
+      error: (err) => {
+        this.notify.error(err?.error?.message || `Failed to ${newStatus ? 'activate' : 'deactivate'}`);
+        this.loadData(); // Reset toggle state
       }
     });
   }

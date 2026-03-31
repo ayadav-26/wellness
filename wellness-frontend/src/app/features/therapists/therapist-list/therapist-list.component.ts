@@ -20,12 +20,13 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { Center } from '../../../core/models/center.model';
 
 @Component({
   selector: 'app-therapist-list',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, MatInputModule, MatDialogModule, MatSelectModule, MatTooltipModule, MatProgressSpinnerModule, ReactiveFormsModule, DataTableComponent, StatusBadgeComponent, HasPermissionDirective],
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatInputModule, MatDialogModule, MatSelectModule, MatTooltipModule, MatProgressSpinnerModule, ReactiveFormsModule, DataTableComponent, StatusBadgeComponent, HasPermissionDirective, MatSlideToggleModule],
   template: `
     <div class="page-header">
       <h1 class="font-display text-3xl">Therapists</h1>
@@ -108,18 +109,27 @@ import { Center } from '../../../core/models/center.model';
 
     <ng-template #actionsTpl let-row="row">
       <div class="actions-cell">
-        <button *hasPermission="['Therapists', 'edit']" mat-icon-button color="accent" matTooltip="Edit Therapist" (click)="openForm(row)">
-          <mat-icon>edit</mat-icon>
-        </button>
-        <button *hasPermission="['Therapists', 'delete']" mat-icon-button color="warn" matTooltip="Delete Therapist" (click)="deleteTherapist(row)">
-          <mat-icon>delete</mat-icon>
-        </button>
+        <!-- Edit icon for ACTIVE -->
+        @if (row.status) {
+          <button *hasPermission="['Therapists', 'edit']" mat-icon-button color="accent" matTooltip="Edit Therapist" (click)="openForm(row)">
+            <mat-icon>edit</mat-icon>
+          </button>
+        }
+
+        <!-- Toggle for status -->
+        <mat-slide-toggle 
+          *hasPermission="['Therapists', 'edit']" 
+          [checked]="row.status" 
+          (change)="toggleStatus(row)"
+          [matTooltip]="row.status ? 'Deactivate Therapist' : 'Activate to edit'"
+          class="compact-toggle">
+        </mat-slide-toggle>
       </div>
     </ng-template>
   `,
   styles: [`
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    h1 { color: #1A1A1A; margin: 0; font-family: 'Inter', sans-serif; }
+    h1 { color: #1A1A1A; margin: 0; }
     .filters-bar { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
     .search-group { display: flex; align-items: center; gap: 8px; flex: 1; max-width: 450px; }
     .right-filters { display: flex; gap: 16px; margin-left: auto; flex-wrap: wrap; }
@@ -184,6 +194,11 @@ import { Center } from '../../../core/models/center.model';
       width: 16px;
       height: 16px;
       color: #2C5F5D;
+    }
+    .actions-cell { display: flex; gap: 8px; align-items: center; }
+    .compact-toggle {
+      transform: scale(0.8);
+      transform-origin: center;
     }
   `]
 })
@@ -334,17 +349,39 @@ export class TherapistListComponent implements OnInit {
     });
   }
 
-  deleteTherapist(therapist: any) {
-    const ref = this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      data: { title: 'Delete Therapist', message: `Delete ${therapist.firstName} ${therapist.lastName}?`, confirmLabel: 'Delete', confirmColor: 'warn' }
-    });
-    ref.afterClosed().subscribe(res => {
-      if (res) {
-        this.service.delete(therapist.therapistId).subscribe(() => {
-          this.notify.success('Deleted successfully');
+  toggleStatus(therapist: any) {
+    if (therapist.status) {
+      const ref = this.dialog.open(ConfirmDialogComponent, {
+        width: '400px',
+        data: { 
+          title: 'Deactivate Therapist', 
+          message: `Are you sure you want to deactivate ${therapist.firstName} ${therapist.lastName}?`, 
+          confirmLabel: 'Deactivate', 
+          confirmColor: 'warn' 
+        }
+      });
+      ref.afterClosed().subscribe(res => {
+        if (res) {
+          this.performStatusUpdate(therapist, false);
+        } else {
           this.loadData();
-        });
+        }
+      });
+    } else {
+      this.performStatusUpdate(therapist, true);
+    }
+  }
+
+  private performStatusUpdate(therapist: any, newStatus: boolean) {
+    this.service.update(therapist.therapistId, { status: newStatus }).subscribe({
+      next: () => {
+        const action = newStatus ? 'activated' : 'deactivated';
+        this.notify.success(`${therapist.firstName} ${action} successfully`);
+        this.loadData();
+      },
+      error: (err) => {
+        this.notify.error(err?.error?.message || `Failed to ${newStatus ? 'activate' : 'deactivate'}`);
+        this.loadData();
       }
     });
   }

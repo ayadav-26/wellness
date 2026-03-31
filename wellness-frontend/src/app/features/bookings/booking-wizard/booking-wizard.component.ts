@@ -149,6 +149,13 @@ import { Router, ActivatedRoute } from '@angular/router';
                 <mat-label>Phone Number</mat-label>
                 <input matInput formControlName="customerPhone" placeholder="10-digit mobile number" maxlength="10" />
                 <mat-icon matPrefix class="material-symbols-outlined">phone</mat-icon>
+                @if (step3.get('customerPhone')?.hasError('required') && step3.get('customerPhone')?.touched) {
+                  <mat-error>Required</mat-error>
+                } @else if (step3.get('customerPhone')?.hasError('invalidPhone')) {
+                  <mat-error>Invalid 10-digit number</mat-error>
+                } @else if (step3.get('customerPhone')?.hasError('invalidStart')) {
+                  <mat-error>Must start with 6, 7, 8, or 9</mat-error>
+                }
               </mat-form-field>
             </div>
 

@@ -86,6 +86,13 @@ import { ImageCropperDialogComponent } from '../../../shared/components/image-cr
             <mat-form-field appearance="outline" style="width: 100%;">
               <mat-label>Phone Number</mat-label>
               <input matInput formControlName="phoneNumber" maxlength="10" placeholder="10-digit number" />
+              @if (form.get('phoneNumber')?.hasError('required') && (form.get('phoneNumber')?.touched || form.get('phoneNumber')?.dirty)) {
+                <mat-error>Required</mat-error>
+              } @else if (form.get('phoneNumber')?.hasError('invalidPhone') && (form.get('phoneNumber')?.touched || form.get('phoneNumber')?.dirty)) {
+                <mat-error>Invalid 10-digit number</mat-error>
+              } @else if (form.get('phoneNumber')?.hasError('invalidStart') && (form.get('phoneNumber')?.touched || form.get('phoneNumber')?.dirty)) {
+                <mat-error>Must start with 6, 7, 8, or 9</mat-error>
+              }
             </mat-form-field>
           </div>
         </div>

@@ -20,10 +20,16 @@
   }
 
   .stat-icon {
-    width: 44px;
-    height: 44px;
+    width: 52px;
+    height: 52px;
     border-radius: $border-radius-md;
     @include flex-center;
+
+    mat-icon {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+    }
   }
 
   .stat-value {

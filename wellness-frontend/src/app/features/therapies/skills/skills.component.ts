@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SkillsService, Skill } from '../../../core/services/skills.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-skills-form',
@@ -153,11 +154,23 @@ export class SkillsManageComponent implements OnInit {
   }
 
   deleteSkill(skill: Skill) {
-      if (confirm(`Are you sure you want to delete ${skill.skillName}?`)) {
-          this.skillService.delete(skill.skillId).subscribe(() => {
-              this.notify.success('Skill deleted successfully');
-              this.loadData();
-          });
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: { 
+        title: 'Delete Skill', 
+        message: `Are you sure you want to delete the skill "${skill.skillName}"?`, 
+        confirmLabel: 'Delete', 
+        confirmColor: 'warn' 
       }
+    });
+
+    ref.afterClosed().subscribe(res => {
+      if (res) {
+        this.skillService.delete(skill.skillId).subscribe(() => {
+          this.notify.success('Skill deleted successfully');
+          this.loadData();
+        });
+      }
+    });
   }
 }

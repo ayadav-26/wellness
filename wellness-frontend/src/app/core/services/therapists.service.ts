@@ -13,8 +13,9 @@ export class TherapistsService {
     return this.api.get<ApiResponse<PaginatedResponse<any>>>(this.base, { params: { ...params } });
   }
 
-  getById(id: number): Observable<ApiResponse<any>> {
-    return this.api.get<ApiResponse<any>>(`${this.base}/${id}`);
+  getById(id: number, includeInactive?: boolean): Observable<ApiResponse<any>> {
+    const params: any = { includeInactive: !!includeInactive };
+    return this.api.get<ApiResponse<any>>(`${this.base}/${id}`, { params });
   }
 
   create(payload: any): Observable<ApiResponse<any>> {

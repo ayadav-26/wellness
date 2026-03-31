@@ -14,8 +14,10 @@ export class CategoriesService {
     return this.api.get<ApiResponse<PaginatedResponse<TherapyCategory>>>(this.base, { params: { ...params } });
   }
 
-  getById(id: number): Observable<ApiResponse<TherapyCategory>> {
-    return this.api.get<ApiResponse<TherapyCategory>>(`${this.base}/${id}`);
+  getById(id: number, includeInactive?: boolean): Observable<ApiResponse<TherapyCategory>> {
+    const params: any = {};
+    if (includeInactive) params.includeInactive = true;
+    return this.api.get<ApiResponse<TherapyCategory>>(`${this.base}/${id}`, { params });
   }
 
   create(payload: Partial<TherapyCategory>): Observable<ApiResponse<TherapyCategory>> {

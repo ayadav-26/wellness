@@ -14,13 +14,26 @@ export class CustomValidators {
 
   /**
    * Validates that the input is exactly 10 digits and numeric.
+   * Restricts numbers starting with 0-5 (must start with 6-9).
    */
   static phoneNumber(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      const val = control.value || '';
+      const val = (control.value || '').toString();
+      if (!val) return null; // Let required validator handle empty values
+
       const isNumeric = /^\d+$/.test(val);
       const isCorrectLength = val.length === 10;
-      return (isNumeric && isCorrectLength) ? null : { 'invalidPhone': true };
+      const startsWithValidDigit = /^[6-9]/.test(val);
+
+      if (!isNumeric || !isCorrectLength) {
+        return { 'invalidPhone': true };
+      }
+
+      if (!startsWithValidDigit) {
+        return { 'invalidStart': true };
+      }
+
+      return null;
     };
   }
 }

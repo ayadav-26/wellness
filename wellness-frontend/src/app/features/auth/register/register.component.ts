@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDialog } from '@angular/material/dialog';
+import { CustomValidators } from '../../../core/validators/custom.validators';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { ImageCropperDialogComponent } from '../../../shared/components/image-cropper-dialog/image-cropper-dialog.component';
@@ -40,7 +41,7 @@ export class RegisterComponent {
     lastName: ['', [Validators.required]],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
-    phoneNumber: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
+    phoneNumber: ['', [Validators.required, CustomValidators.phoneNumber()]],
     // role is always assigned server-side as 'User' — not included here
   });
 

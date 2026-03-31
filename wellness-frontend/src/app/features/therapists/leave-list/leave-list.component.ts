@@ -48,7 +48,7 @@ import { MatTableDataSource } from '@angular/material/table';
   `,
   styles: [`
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    h1 { color: #1A1A1A; margin: 0; font-family: 'Cormorant Garamond', serif; }
+    h1 { color: #1A1A1A; margin: 0; }
     .actions-cell { display: flex; gap: 4px; }
   `]
 })

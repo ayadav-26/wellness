@@ -56,7 +56,7 @@ export class CategoryFormComponent implements OnInit {
   ngOnInit() {
     if (this.data && this.data.categoryId) {
       this.loading.set(true);
-      this.service.getById(this.data.categoryId).subscribe({
+      this.service.getById(this.data.categoryId, true).subscribe({
         next: (res) => {
           this.loading.set(false);
           if (res.data) {

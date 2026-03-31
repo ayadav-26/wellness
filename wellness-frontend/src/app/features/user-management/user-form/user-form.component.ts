@@ -40,9 +40,9 @@ import { ImageCropperDialogComponent } from '../../../shared/components/image-cr
             <label class="block text-sm font-medium mb-2 text-slate-600">Account Type</label>
             <mat-radio-group formControlName="role" class="flex gap-6">
               @if (perm.isSuperAdmin()) {
-                <mat-radio-button value="Admin">Admin</mat-radio-button>
+                <mat-radio-button value="Admin" disableRipple>Admin</mat-radio-button>
               }
-              <mat-radio-button value="Receptionist">Receptionist</mat-radio-button>
+              <mat-radio-button value="Receptionist" disableRipple>Receptionist</mat-radio-button>
             </mat-radio-group>
           </div>
         }

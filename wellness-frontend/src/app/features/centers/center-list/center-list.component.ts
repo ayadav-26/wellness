@@ -37,25 +37,27 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   template: `
     <div class="page-header">
       <h1 class="font-display text-3xl">Centers</h1>
-      <button *hasPermission="['Centers', 'create']" mat-raised-button color="primary" (click)="openForm()">
+      <button *hasPermission="['Centers', 'create']" mat-raised-button color="primary" (click)="openForm()" class="bg-white">
         <mat-icon>add</mat-icon> Add Center
       </button>
     </div>
 
     <div class="filters-bar mb-4">
-      <mat-form-field appearance="outline" class="search-field">
-        <mat-label>Search by Name, City or Contact</mat-label>
-        <input matInput [formControl]="searchControl" placeholder="Enter keyword..." (keyup.enter)="onSearch()">
-        <mat-icon matPrefix>search</mat-icon>
-        @if (searchControl.value) {
-          <button mat-icon-button matSuffix (click)="clearSearch()" aria-label="Clear search">
-            <mat-icon>close</mat-icon>
-          </button>
-        }
-      </mat-form-field>
-      <button mat-raised-button color="primary" (click)="onSearch()">
-        <mat-icon>search</mat-icon> Search
-      </button>
+      <div class="search-group flex items-center gap-2">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-field flex-1 mb-0">
+          <mat-label>Search by Name, City or Contact</mat-label>
+          <input matInput [formControl]="searchControl" placeholder="Enter keyword..." (keyup.enter)="onSearch()">
+          <mat-icon matPrefix>search</mat-icon>
+          @if (searchControl.value) {
+            <button mat-icon-button matSuffix (click)="clearSearch()" aria-label="Clear search">
+              <mat-icon>close</mat-icon>
+            </button>
+          }
+        </mat-form-field>
+        <button mat-raised-button color="primary" class="rounded-btn bg-white" (click)="onSearch()">
+          <mat-icon>search</mat-icon> Search
+        </button>
+      </div>
     </div>
 
     <app-data-table
@@ -113,8 +115,31 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   styles: [`
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
     h1 { color: #1A1A1A; margin: 0; }
-    .search-field { width: 100%; max-width: 400px; }
+    .search-field { 
+      width: 100%; 
+      max-width: 400px; 
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        background-color: #fff !important;
+      }
+    }
     .filters-bar { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+    .search-group { display: flex; align-items: center; gap: 8px; flex: 1; max-width: 450px; }
+    .rounded-btn { 
+      border-radius: 50px !important; 
+      height: 44px; 
+      padding: 0 24px; 
+      font-weight: 600;
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .bg-white { 
+      background-color: #fff !important; 
+      color: #2C5F5D !important; 
+      border: 1px solid #d1d1d1 !important;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+    }
     .actions-cell { display: flex; gap: 4px; }
 
     .name-link {

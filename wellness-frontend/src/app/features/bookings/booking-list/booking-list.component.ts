@@ -54,7 +54,8 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/compo
         *hasPermission="['Bookings', 'create']" 
         mat-raised-button 
         color="primary"
-        [routerLink]="['/bookings/new']">
+        [routerLink]="['/bookings/new']"
+        class="bg-white">
         <mat-icon>add</mat-icon> New Booking
       </button>
     </div>
@@ -71,7 +72,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/compo
             </button>
           }
         </mat-form-field>
-        <button mat-raised-button color="primary" class="rounded-btn" (click)="onSearch()">
+        <button mat-raised-button color="primary" class="rounded-btn bg-white" (click)="onSearch()">
           <mat-icon>search</mat-icon> Search
         </button>
       </div>
@@ -194,19 +195,36 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/compo
       gap: 16px; 
       align-items: center;
       flex-wrap: wrap;
-      background: white;
-      padding: 16px 20px;
-      border-radius: 12px;
-      border: 1px solid #E0E0E0;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    }
+    .bg-white { 
+      background-color: #fff !important; 
+      color: #2C5F5D !important; 
+      border: 1px solid #d1d1d1 !important;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
     }
     
-    .filter-center { width: 220px; }
-    .filter-status { width: 150px; }
-    .filter-date { width: 210px; }
+    .filter-center { width: 220px; 
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        background-color: #fff !important;
+      }
+    }
+    .filter-status { width: 150px; 
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        background-color: #fff !important;
+      }
+    }
+    .filter-date { width: 210px; 
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        background-color: #fff !important;
+      }
+    }
     
     .search-group { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 300px; max-width: 450px; }
-    .search-field { width: 100%; max-width: none; flex: 1; }
+    .search-field { width: 100%; max-width: none; flex: 1; 
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        background-color: #fff !important;
+      }
+    }
     .rounded-btn { 
       border-radius: 50px !important; 
       height: 44px; 

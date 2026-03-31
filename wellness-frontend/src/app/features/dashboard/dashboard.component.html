@@ -45,25 +45,26 @@
       <app-stat-card
         label="Bookings Today"
         [value]="stats().bookingsToday"
-        icon="event_available">
+        icon="event_available"
+        color="#FDB813">
       </app-stat-card>
       <app-stat-card
         label="Active Therapists"
         [value]="stats().activeTherapists"
-        icon="group"
-        color="#B07D2A">
+        icon="groups"
+        color="#FDB813">
       </app-stat-card>
       <app-stat-card
         label="Cancellations Today"
         [value]="stats().cancellationsToday"
         icon="event_busy"
-        color="#B03A3A">
+        color="#FDB813">
       </app-stat-card>
       <app-stat-card
         label="Upcoming Bookings"
         [value]="stats().upcomingToday.length"
-        icon="schedule"
-        color="#2A5F8F">
+        icon="pending_actions"
+        color="#FDB813">
       </app-stat-card>
     </div>
 

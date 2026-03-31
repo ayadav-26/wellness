@@ -26,7 +26,7 @@ import { TherapyCategory } from '../../../core/models/category.model';
   template: `
     <div class="page-header">
       <h1 class="font-display text-3xl">Therapy Categories</h1>
-      <button *hasPermission="['Categories', 'create']" mat-raised-button color="primary" (click)="openForm()">
+      <button *hasPermission="['Categories', 'create']" mat-raised-button color="primary" (click)="openForm()" class="bg-white">
         <mat-icon>add</mat-icon> Add Category
       </button>
     </div>
@@ -43,7 +43,7 @@ import { TherapyCategory } from '../../../core/models/category.model';
             </button>
           }
         </mat-form-field>
-        <button mat-raised-button color="primary" class="rounded-btn" (click)="onSearch()">
+        <button mat-raised-button color="primary" class="rounded-btn bg-white" (click)="onSearch()">
           <mat-icon>search</mat-icon> Search
         </button>
       </div>
@@ -100,8 +100,18 @@ import { TherapyCategory } from '../../../core/models/category.model';
     h1 { color: #1A1A1A; margin: 0; }
     .filters-bar { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
     .search-group { display: flex; align-items: center; gap: 8px; flex: 1; max-width: 450px; }
-    .search-field { width: 100%; max-width: 400px; }
-    .right-filters { display: flex; gap: 16px; margin-left: auto; align-items: center; }
+    .search-field { 
+      width: 100%; 
+      max-width: 400px; 
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        background-color: #fff !important;
+      }
+    }
+    .right-filters { display: flex; gap: 16px; margin-left: auto; align-items: center; 
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        background-color: #fff !important;
+      }
+    }
     .rounded-btn { 
       border-radius: 50px !important; 
       height: 44px; 
@@ -120,6 +130,12 @@ import { TherapyCategory } from '../../../core/models/category.model';
       height: 20px !important;
       line-height: 20px !important;
       display: block !important;
+    }
+    .bg-white { 
+      background-color: #fff !important; 
+      color: #2C5F5D !important; 
+      border: 1px solid #d1d1d1 !important;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
     }
     .actions-cell { display: flex; gap: 8px; align-items: center; }
     .compact-toggle {

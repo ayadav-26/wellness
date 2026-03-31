@@ -247,8 +247,6 @@ import { MatDialog } from '@angular/material/dialog';
       display: flex;
       flex-direction: column;
       gap: 12px;
-      background: #fdfdfd;
-      border: 1px solid #f0f0f0;
       padding: 16px;
       border-radius: 12px;
     }

@@ -25,7 +25,7 @@ import { PermissionManagementComponent } from './permission-management/permissio
   selector: 'app-user-management',
   standalone: true,
   imports: [
-    CommonModule, ReactiveFormsModule, MatCardModule, MatInputModule, 
+    CommonModule, ReactiveFormsModule, MatCardModule, MatInputModule,
     MatButtonModule, MatIconModule, MatDividerModule, MatProgressSpinnerModule,
     MatSelectModule, MatDialogModule, MatTooltipModule, DataTableComponent,
     MatTabsModule, PermissionManagementComponent
@@ -37,7 +37,7 @@ import { PermissionManagementComponent } from './permission-management/permissio
           <h1 class="font-display text-3xl">User Management</h1>
           <p class="text-muted">Manage system administrators and receptionists.</p>
         </div>
-        <button mat-raised-button color="primary" (click)="openUserForm()">
+        <button mat-raised-button color="primary" (click)="openUserForm()" class="bg-white rounded-btn">
           <mat-icon>person_add</mat-icon> Add User
         </button>
       </div>
@@ -102,8 +102,28 @@ import { PermissionManagementComponent } from './permission-management/permissio
     .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
     .page-header h1 { margin: 0; color: #1E3A38; font-weight: 700; }
     .text-muted { color: #666; margin-top: 2px; }
+    .bg-white { 
+      background-color: #fff !important; 
+      color: #2C5F5D !important; 
+      border: 1px solid #d1d1d1 !important;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+    }
+    .rounded-btn { 
+      border-radius: 50px !important; 
+      height: 44px; 
+      padding: 0 24px; 
+      font-weight: 600;
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
     
-    .filter-field { width: 300px; }
+    .filter-field { width: 300px; 
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        background-color: #fff !important;
+      }
+    }
     
     .role-badge { 
       padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
@@ -128,7 +148,7 @@ export class UserManagementComponent implements OnInit {
 
   loadingList = signal(true);
   centers = signal<any[]>([]);
-  
+
   dataSource = new MatTableDataSource<any>([]);
   totalCount = signal(0);
   columns: TableColumn[] = [];
@@ -137,8 +157,10 @@ export class UserManagementComponent implements OnInit {
 
   ngOnInit() {
     this.columns = [
-      { key: 'firstName', label: 'Name', 
-        formatter: (row: any) => `${row.firstName} ${row.lastName || ''}` },
+      {
+        key: 'firstName', label: 'Name',
+        formatter: (row: any) => `${row.firstName} ${row.lastName || ''}`
+      },
       { key: 'email', label: 'Email' },
       { key: 'role', label: 'Role', template: this.roleTpl },
       { key: 'center', label: 'Center', template: this.centerTpl },
@@ -193,11 +215,11 @@ export class UserManagementComponent implements OnInit {
   deleteUser(row: any) {
     const ref = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
-      data: { 
-        title: 'Deactivate User', 
-        message: `Are you sure you want to deactivate ${row.firstName}?`, 
-        confirmLabel: 'Deactivate', 
-        confirmColor: 'warn' 
+      data: {
+        title: 'Deactivate User',
+        message: `Are you sure you want to deactivate ${row.firstName}?`,
+        confirmLabel: 'Deactivate',
+        confirmColor: 'warn'
       }
     });
 

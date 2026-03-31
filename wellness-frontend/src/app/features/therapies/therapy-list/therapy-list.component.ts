@@ -35,7 +35,7 @@ import { Therapy } from '../../../core/models/therapy.model';
             <mat-icon>psychology</mat-icon> Manage Skills
           </button>
         }
-        <button *hasPermission="['Therapies', 'create']" mat-raised-button color="primary" (click)="openForm()">
+        <button *hasPermission="['Therapies', 'create']" mat-raised-button color="primary" (click)="openForm()" class="bg-white">
           <mat-icon>add</mat-icon> Add Therapy
         </button>
       </div>
@@ -53,7 +53,7 @@ import { Therapy } from '../../../core/models/therapy.model';
             </button>
           }
         </mat-form-field>
-        <button mat-raised-button color="primary" class="rounded-btn" (click)="onSearch()">
+        <button mat-raised-button color="primary" class="rounded-btn bg-white" (click)="onSearch()">
           <mat-icon>search</mat-icon> Search
         </button>
       </div>
@@ -125,8 +125,18 @@ import { Therapy } from '../../../core/models/therapy.model';
     .header-actions { display: flex; gap: 8px; }
     .filters-bar { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
     .search-group { display: flex; align-items: center; gap: 8px; flex: 1; max-width: 450px; }
-    .search-field { width: 100%; max-width: 400px; }
-    .right-filters { display: flex; gap: 16px; margin-left: auto; align-items: center; }
+    .search-field { 
+      width: 100%; 
+      max-width: 400px; 
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        background-color: #fff !important;
+      }
+    }
+    .right-filters { display: flex; gap: 16px; margin-left: auto; align-items: center; 
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        background-color: #fff !important;
+      }
+    }
     .rounded-btn { 
       border-radius: 50px !important; 
       height: 44px; 
@@ -152,7 +162,12 @@ import { Therapy } from '../../../core/models/therapy.model';
       transform-origin: center;
     }
     .mr-2 { margin-right: 8px; }
-    .bg-white { background-color: #fff !important; }
+    .bg-white { 
+      background-color: #fff !important; 
+      color: #2C5F5D !important; 
+      border: 1px solid #d1d1d1 !important;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+    }
   `]
 })
 export class TherapyListComponent implements OnInit {

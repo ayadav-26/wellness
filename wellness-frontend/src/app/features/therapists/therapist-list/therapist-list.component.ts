@@ -30,7 +30,7 @@ import { Center } from '../../../core/models/center.model';
   template: `
     <div class="page-header">
       <h1 class="font-display text-3xl">Therapists</h1>
-      <button *hasPermission="['Therapists', 'create']" mat-raised-button color="primary" (click)="openForm()">
+      <button *hasPermission="['Therapists', 'create']" mat-raised-button color="primary" (click)="openForm()" class="bg-white">
         <mat-icon>add</mat-icon> Add Therapist
       </button>
     </div>
@@ -47,7 +47,7 @@ import { Center } from '../../../core/models/center.model';
             </button>
           }
         </mat-form-field>
-        <button mat-raised-button color="primary" class="rounded-btn" (click)="onSearch()">
+        <button mat-raised-button color="primary" class="rounded-btn bg-white" (click)="onSearch()">
            <mat-icon>search</mat-icon> Search
         </button>
       </div>
@@ -132,8 +132,16 @@ import { Center } from '../../../core/models/center.model';
     h1 { color: #1A1A1A; margin: 0; }
     .filters-bar { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
     .search-group { display: flex; align-items: center; gap: 8px; flex: 1; max-width: 450px; }
-    .right-filters { display: flex; gap: 16px; margin-left: auto; flex-wrap: wrap; }
-    .search-field { width: 100%; }
+    .right-filters { display: flex; gap: 16px; margin-left: auto; flex-wrap: wrap; 
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        background-color: #fff !important;
+      }
+    }
+    .search-field { width: 100%; 
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        background-color: #fff !important;
+      }
+    }
     .filter-field { width: 250px; }
     .status-filter { width: 140px; }
     .rounded-btn { 
@@ -194,6 +202,12 @@ import { Center } from '../../../core/models/center.model';
       width: 16px;
       height: 16px;
       color: #2C5F5D;
+    }
+    .bg-white { 
+      background-color: #fff !important; 
+      color: #2C5F5D !important; 
+      border: 1px solid #d1d1d1 !important;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
     }
     .actions-cell { display: flex; gap: 8px; align-items: center; }
     .compact-toggle {

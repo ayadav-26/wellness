@@ -21,7 +21,7 @@ import { MatTableDataSource } from '@angular/material/table';
   template: `
     <div class="page-header">
       <h1 class="font-display text-3xl">Therapist Leaves</h1>
-      <button *hasPermission="['Leaves', 'create']" mat-raised-button color="primary" (click)="openForm()">
+      <button *hasPermission="['Leaves', 'create']" mat-raised-button color="primary" (click)="openForm()" class="bg-white rounded-btn">
         <mat-icon>add</mat-icon> Register Leave
       </button>
     </div>
@@ -49,6 +49,22 @@ import { MatTableDataSource } from '@angular/material/table';
   styles: [`
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
     h1 { color: #1A1A1A; margin: 0; }
+    .bg-white { 
+      background-color: #fff !important; 
+      color: #2C5F5D !important; 
+      border: 1px solid #d1d1d1 !important;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+    }
+    .rounded-btn { 
+      border-radius: 50px !important; 
+      height: 44px; 
+      padding: 0 24px; 
+      font-weight: 600;
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
     .actions-cell { display: flex; gap: 4px; }
   `]
 })

@@ -9,7 +9,13 @@ const sequelize = new Sequelize(env.DB.NAME, env.DB.USER, env.DB.PASSWORD, {
     define: {
         timestamps: true,
         underscored: false
-    }
+    },
+    dialectOptions: {
+        ssl: {
+            require: true,
+            rejectUnauthorized: false,
+        },
+    },
 });
 
 const connectDB = async () => {

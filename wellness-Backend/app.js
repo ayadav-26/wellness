@@ -7,7 +7,7 @@ const app = express();
 const env = require('./src/config/env');
 
 //  CORS (put BEFORE routes)
-const allowedOrigins = config.ALLOWED_ORIGINS;
+const allowedOrigins = env.ALLOWED_ORIGINS;
 
 app.use(cors({
     origin: function (origin, callback) {

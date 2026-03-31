@@ -4,19 +4,21 @@ const trimAndValidate = require('./src/middleware/validationMiddleware');
 const cors = require('cors');
 const seedSuperAdmin = require('./src/seeds/seedSuperAdmin');
 const app = express();
+const env = require('./src/config/env');
 
 //  CORS (put BEFORE routes)
-const allowedOrigins = [
-    'http://localhost:4200',
-    'https://yourdomain.com'
-];
+const allowedOrigins = config.ALLOWED_ORIGINS;
 
 app.use(cors({
     origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
+        // allow requests with no origin (like mobile apps, postman)
+        if (!origin) return callback(null, true);
+
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
         } else {
-            callback(new Error('Not allowed by CORS'));
+            console.log('Blocked by CORS:', origin);
+            return callback(new Error('Not allowed by CORS'));
         }
     },
     credentials: true

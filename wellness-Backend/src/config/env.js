@@ -44,5 +44,6 @@ module.exports = {
         ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID,
         AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN,
         PHONE_NUMBER: process.env.TWILIO_PHONE_NUMBER
-    }
+    },
+    ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['http://localhost:4200']
 };

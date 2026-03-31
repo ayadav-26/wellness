@@ -11,15 +11,19 @@ const allowedOrigins = env.ALLOWED_ORIGINS;
 
 app.use(cors({
     origin: function (origin, callback) {
-        // allow requests with no origin (like mobile apps, postman)
+
         if (!origin) return callback(null, true);
 
+        // Allow exact matches
         if (allowedOrigins.includes(origin)) {
             return callback(null, true);
-        } else {
-            console.log('Blocked by CORS:', origin);
-            return callback(new Error('Not allowed by CORS'));
         }
+
+       if (origin.includes('wellness-dof.pages.dev')) {
+    return callback(null, true);
+}
+        console.log('Blocked by CORS:', origin);
+        return callback(new Error('Not allowed by CORS'));
     },
     credentials: true
 }));

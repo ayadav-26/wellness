@@ -12,6 +12,20 @@
   z-index: 50;
   box-shadow: $shadow-sm;
 
+  @include respond-to('md') {
+    padding: 0 $spacing-4;
+  }
+
+  .mobile-menu-btn {
+    display: none;
+    margin-right: $spacing-2;
+    color: $color-text-secondary;
+
+    @include respond-to('md') {
+      display: inline-flex;
+    }
+  }
+
   .page-title {
     h2 {
       font-size: $text-lg;

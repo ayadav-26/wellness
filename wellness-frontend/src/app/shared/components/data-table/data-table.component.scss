@@ -1,4 +1,5 @@
 @use 'variables' as *;
+@use 'mixins' as *;
 
 .table-wrapper {
   display: flex;
@@ -9,11 +10,113 @@
   box-shadow: $shadow-sm;
   background: $color-surface;
   border: 1px solid $color-border;
+  width: 100%;
+  overflow: hidden;
+
+  @include respond-to('md') {
+    max-height: none;
+    border-radius: $border-radius-sm;
+  }
 }
 
-.table-scroll-area {
+.desktop-view {
   flex: 1 1 auto;
   overflow: auto;
+  display: block;
+  
+  /* Ensure smooth horizontal scroll on desktop if constrained */
+  -webkit-overflow-scrolling: touch;
+
+  @include respond-to('md') {
+    display: none;
+  }
+}
+
+.mobile-cards-view {
+  display: none;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: $spacing-4;
+  background: $color-surface-alt; // Slightly different BG to make cards pop
+
+  @include respond-to('md') {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-4;
+  }
+
+  .data-card {
+    background: $color-surface;
+    border-radius: $border-radius-md;
+    padding: $spacing-4;
+    box-shadow: $shadow-sm;
+    // Removed solid border box — only a subtle left accent for visual interest
+    border: none;
+    border-left: 3px solid $color-primary;
+    transition: transform $transition-fast, box-shadow $transition-fast;
+
+    &:active {
+      transform: scale(0.98);
+      box-shadow: none;
+    }
+
+    .card-field {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: $spacing-2 0;
+      border-bottom: 1px solid rgba($color-border, 0.5);
+      gap: $spacing-4;
+
+      &:first-child {
+        padding-top: 0;
+      }
+
+      &:last-of-type {
+        border-bottom: none;
+        padding-bottom: 0;
+        margin-bottom: 0;
+      }
+
+      .field-label {
+        font-family: $font-body;
+        font-size: 11px;
+        font-weight: 700;
+        color: $color-text-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        flex: 0 0 110px;
+        line-height: 1.4;
+      }
+
+      .field-value {
+        font-family: $font-body;
+        font-size: 13px;
+        font-weight: 500;
+        color: $color-text-primary;
+        // Use flex-end alignment for simple text, but align-items handles flex children
+        text-align: right;
+        flex: 1;
+        word-break: break-word;
+        // Ensure flex children (badges, buttons) stay right-aligned without being centered
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 4px;
+      }
+    }
+
+    .card-actions {
+      margin-top: $spacing-3;
+      padding-top: $spacing-3;
+      border-top: 1px dashed rgba($color-border, 0.8);
+      display: flex;
+      justify-content: flex-end;
+      gap: $spacing-2;
+      flex-wrap: wrap;
+    }
+  }
 }
 
 .mat-mdc-table {
@@ -32,19 +135,32 @@
 
   .mat-mdc-header-cell {
     font-family: $font-body;
-    font-size: 13px !important;  /* increased for better readability */
+    font-size: 13px !important;
     font-weight: 700;
     color: $color-text-muted;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     border-bottom: none;
     padding: $spacing-2 $spacing-4;
+    min-width: 150px; /* Ensure content is visible */
+    
+    @include respond-to('md') {
+      min-width: 120px;
+    }
+
+    /* Standard header centering for Actions */
+    &.mat-column-actions {
+      text-align: center !important;
+      justify-content: center !important;
+      min-width: 180px; /* Matching cell min-width */
+      padding: 0 !important;
+    }
   }
 
   .mat-mdc-row {
     border-bottom: 1px solid $color-border;
     transition: background $transition-fast;
-    min-height: 48px !important; /* slightly increased for better row spacing */
+    min-height: 52px !important; 
 
     &:hover {
       background: rgba($color-primary, 0.03);
@@ -56,10 +172,26 @@
   }
 
   .mat-mdc-cell {
-    font-size: 15px; /* increased to production-like size */
+    font-size: 14px; // refined for and center look
     color: $color-text-secondary;
     padding: $spacing-2 $spacing-4;
     border-bottom: none;
+    min-width: 150px; /* Match header for column consistency */
+    
+    @include respond-to('md') {
+      min-width: 120px;
+    }
+
+    /* Actions column specificity: Center alignment and no cutting */
+    &.mat-column-actions {
+      min-width: 180px !important; 
+      justify-content: center !important;
+      text-align: center !important;
+      display: flex !important;
+      align-items: center;
+      overflow: visible !important;
+      padding: 0 !important;
+    }
   }
 }
 

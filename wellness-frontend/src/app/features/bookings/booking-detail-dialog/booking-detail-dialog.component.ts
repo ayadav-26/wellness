@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { RouterModule } from '@angular/router';
 import { HasPermissionDirective } from '../../../core/directives/has-permission.directive';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-booking-detail-dialog',
@@ -127,9 +128,11 @@ import { HasPermissionDirective } from '../../../core/directives/has-permission.
           </button>
         }
 
-        <button *hasPermission="['Bookings', 'edit']" mat-raised-button color="primary" [routerLink]="['/bookings', data.bookingId, 'edit']" mat-dialog-close>
-          <mat-icon>edit</mat-icon> Edit Booking
-        </button>
+        @if (!['Completed', 'Cancelled'].includes(data.bookingStatus) && (!isUserRole() || data.bookingStatus !== 'Confirmed')) {
+          <button *hasPermission="['Bookings', 'edit']" mat-raised-button color="primary" [routerLink]="['/bookings', data.bookingId, 'edit']" mat-dialog-close>
+            <mat-icon>edit</mat-icon> Edit Booking
+          </button>
+        }
       </mat-dialog-actions>
     </div>
   `,
@@ -171,9 +174,19 @@ import { HasPermissionDirective } from '../../../core/directives/has-permission.
     .border-b { border-bottom: 1px solid #e2e8f0; }
     .border-t { border-top: 1px solid #e2e8f0; }
     .my-6 { margin-top: 24px; margin-bottom: 24px; }
+    
+    /* Specific Border for Stroked Cancel Button */
+    button[mat-stroked-button][color="warn"] {
+      border: 1.5px solid #f44336 !important;
+    }
   `]
 })
 export class BookingDetailDialogComponent {
   data = inject<any>(MAT_DIALOG_DATA);
   dialogRef = inject(MatDialogRef<BookingDetailDialogComponent>);
+  private auth = inject(AuthService);
+
+  isUserRole(): boolean {
+    return this.auth.getCurrentUser()?.role === 'User';
+  }
 }

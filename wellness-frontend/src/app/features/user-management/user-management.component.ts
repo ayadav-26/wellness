@@ -20,6 +20,7 @@ import { UserFormComponent } from './user-form/user-form.component';
 import { DataTableComponent, TableColumn } from '../../shared/components/data-table/data-table.component';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { PermissionManagementComponent } from './permission-management/permission-management.component';
+import { UserDetailsComponent } from './user-details/user-details.component';
 
 @Component({
   selector: 'app-user-management',
@@ -79,6 +80,14 @@ import { PermissionManagementComponent } from './permission-management/permissio
     </div>
 
     <!-- Templates for Table -->
+    <ng-template #nameTpl let-value let-row="row">
+      <button class="name-link" (click)="viewDetails(row.userId)" [disabled]="loadingDetails()">
+        <span>{{ value }}</span>
+        @if (loadingDetails() && activeId() === row.userId) {
+          <mat-spinner diameter="14" class="inline-spinner"></mat-spinner>
+        }
+      </button>
+    </ng-template>
     <ng-template #roleTpl let-role>
       <span class="role-badge" [ngClass]="role.toLowerCase()">{{ role }}</span>
     </ng-template>
@@ -119,7 +128,8 @@ import { PermissionManagementComponent } from './permission-management/permissio
       gap: 8px;
     }
     
-    .filter-field { width: 300px; 
+    .filter-field { 
+      width: 300px; 
       ::ng-deep .mat-mdc-text-field-wrapper {
         background-color: #fff !important;
       }
@@ -133,9 +143,33 @@ import { PermissionManagementComponent } from './permission-management/permissio
     .role-badge.super_admin { background: #fff3e0; color: #ef6c00; }
     
     .list-section { background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden; }
+
+    .name-link {
+      background: none;
+      border: none;
+      padding: 0;
+      margin: 0;
+      font-family: inherit;
+      font-size: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #673ab7;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: color 0.2s;
+      &:hover:not([disabled]) { text-decoration: underline; color: #512da8; }
+      &[disabled] { cursor: default; opacity: 0.7; }
+    }
+
+    .inline-spinner {
+      margin-left: 4px;
+    }
   `]
 })
 export class UserManagementComponent implements OnInit {
+  @ViewChild('nameTpl', { static: true }) nameTpl!: TemplateRef<any>;
   @ViewChild('roleTpl', { static: true }) roleTpl!: TemplateRef<any>;
   @ViewChild('centerTpl', { static: true }) centerTpl!: TemplateRef<any>;
   @ViewChild('actionsTpl', { static: true }) actionsTpl!: TemplateRef<any>;
@@ -147,6 +181,8 @@ export class UserManagementComponent implements OnInit {
   private dialog = inject(MatDialog);
 
   loadingList = signal(true);
+  loadingDetails = signal(false);
+  activeId = signal<number | null>(null);
   centers = signal<any[]>([]);
 
   dataSource = new MatTableDataSource<any>([]);
@@ -159,6 +195,7 @@ export class UserManagementComponent implements OnInit {
     this.columns = [
       {
         key: 'firstName', label: 'Name',
+        template: this.nameTpl,
         formatter: (row: any) => `${row.firstName} ${row.lastName || ''}`
       },
       { key: 'email', label: 'Email' },
@@ -172,6 +209,30 @@ export class UserManagementComponent implements OnInit {
 
     this.centerFilter.valueChanges.subscribe(() => {
       this.loadData();
+    });
+  }
+
+  viewDetails(userId: number) {
+    if (this.loadingDetails()) return;
+    this.loadingDetails.set(true);
+    this.activeId.set(userId);
+
+    this.userService.getById(userId).subscribe({
+      next: (res) => {
+        this.loadingDetails.set(false);
+        this.activeId.set(null);
+        if (res.data) {
+          this.dialog.open(UserDetailsComponent, {
+            width: '450px',
+            data: res.data,
+            autoFocus: false
+          });
+        }
+      },
+      error: () => {
+        this.loadingDetails.set(false);
+        this.activeId.set(null);
+      }
     });
   }
 

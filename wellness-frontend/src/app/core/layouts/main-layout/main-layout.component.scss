@@ -1,10 +1,12 @@
 @use 'variables' as *;
+@use 'mixins' as *;
 
 .layout-container {
   display: flex;
   height: 100vh;
   overflow: hidden;
   background: $color-bg;
+  position: relative;
 }
 
 .main-wrapper {
@@ -12,7 +14,7 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  transition: width $transition-base;
+  transition: padding-left $transition-base;
 }
 
 .content-area {
@@ -20,4 +22,24 @@
   padding: $spacing-8;
   overflow-y: auto;
   overflow-x: hidden;
+
+  @include respond-to('md') {
+    padding: $spacing-4;
+  }
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+  z-index: 90;
+  
+  @include respond-to('md') {
+    display: block;
+  }
 }

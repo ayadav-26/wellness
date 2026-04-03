@@ -76,9 +76,25 @@ export class DashboardComponent implements OnInit {
       }
     },
     scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Days',
+          font: { size: 12, weight: 600 },
+          color: '#666',
+          padding: { top: 10 }
+        }
+      },
       y: {
         beginAtZero: true,
-        ticks: { precision: 0 }
+        ticks: { precision: 0 },
+        title: {
+          display: true,
+          text: 'Bookings',
+          font: { size: 12, weight: 600 },
+          color: '#666',
+          padding: { bottom: 10 }
+        }
       }
     }
   };

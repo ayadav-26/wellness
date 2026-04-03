@@ -62,16 +62,41 @@
 .mat-mdc-form-field {
   width: 100%;
   font-family: $font-body;
+
+  // Global standard for 44px height fields (Outline appearance)
+  &.mat-form-field-appearance-outline {
+    .mat-mdc-text-field-wrapper {
+      height: 44px !important;
+      padding: 0 16px !important;
+      background-color: #fff !important;
+    }
+
+    .mat-mdc-form-field-infix {
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      min-height: 44px !important;
+      display: flex !important;
+      align-items: center !important;
+    }
+
+    // Centering the floating label and placeholder
+    .mat-mdc-floating-label {
+      top: 22px !important;
+      line-height: 44px !important;
+    }
+
+    &.mat-form-field-should-float .mat-mdc-floating-label {
+      top: 28px !important;
+      line-height: normal !important;
+    }
+  }
 }
 
 .mat-mdc-input-element {
   font-family: $font-body !important;
   font-size: $text-base !important;
   color: $color-text-primary !important;
-}
-
-.mat-mdc-floating-label {
-  font-family: $font-body !important;
+  line-height: normal !important;
 }
 
 .mat-mdc-form-field-error {

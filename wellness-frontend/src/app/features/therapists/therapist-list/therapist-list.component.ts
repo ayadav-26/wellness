@@ -22,6 +22,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { Center } from '../../../core/models/center.model';
+import { ApiResponse } from '../../../core/models/api-response.model';
 
 @Component({
   selector: 'app-therapist-list',
@@ -39,22 +40,21 @@ import { Center } from '../../../core/models/center.model';
       <div class="search-group">
         <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
           <mat-label>Search Name or Phone Number</mat-label>
-          <input matInput [formControl]="searchControl" placeholder="Enter keyword..." (keyup.enter)="onSearch()">
-          <mat-icon matPrefix>search</mat-icon>
+          <input matInput [formControl]="searchControl" (keyup.enter)="onSearch()">
           @if (searchControl.value) {
             <button mat-icon-button matSuffix (click)="clearSearch()" aria-label="Clear search">
               <mat-icon>close</mat-icon>
             </button>
           }
         </mat-form-field>
-        <button mat-raised-button color="primary" class="rounded-btn bg-white" (click)="onSearch()">
-           <mat-icon>search</mat-icon> Search
+        <button mat-raised-button color="primary" class="rounded-btn search-btn" (click)="onSearch()" matTooltip="Search">
+           <mat-icon>search</mat-icon> 
         </button>
       </div>
 
       @if (!isReceptionist()) {
         <div class="right-filters">
-          <mat-form-field appearance="outline" class="filter-field">
+          <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
             <mat-label>Filter by Center</mat-label>
             <mat-select [formControl]="centerControl">
               <mat-option [value]="null">All Centers</mat-option>
@@ -65,7 +65,7 @@ import { Center } from '../../../core/models/center.model';
             <mat-icon matPrefix>storefront</mat-icon>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="filter-field status-filter">
+          <mat-form-field appearance="outline" class="filter-field status-filter" subscriptSizing="dynamic">
             <mat-label>Status</mat-label>
             <mat-select [formControl]="statusControl">
               <mat-option value="active">Active</mat-option>
@@ -130,30 +130,95 @@ import { Center } from '../../../core/models/center.model';
   styles: [`
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
     h1 { color: #1A1A1A; margin: 0; }
-    .filters-bar { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
-    .search-group { display: flex; align-items: center; gap: 8px; flex: 1; max-width: 450px; }
-    .right-filters { display: flex; gap: 16px; margin-left: auto; flex-wrap: wrap; 
+    .filters-bar { 
+      display: flex; 
+      gap: 16px; 
+      align-items: center; 
+      flex-wrap: wrap; 
+      margin-bottom: 24px;
+      min-height: 56px;
+    }
+    .search-group { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      flex: 1; 
+      max-width: 500px;
+      min-width: 300px;
+      @media (max-width: 768px) {
+        max-width: 100%;
+        min-width: 100%;
+      }
+    }
+    .search-field { 
+      flex: 1;
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        background-color: #fff !important;
+        height: 44px !important;
+      }
+      ::ng-deep .mat-mdc-form-field-infix {
+        padding-top: 11px !important;
+        padding-bottom: 11px !important;
+        min-height: 44px !important;
+      }
+    }
+    .right-filters { 
+      display: flex; 
+      gap: 12px; 
+      margin-left: auto; 
+      flex-wrap: wrap;
+      align-items: center;
+      @media (max-width: 992px) {
+        margin-left: 0;
+        width: 100%;
+      }
       ::ng-deep .mat-mdc-text-field-wrapper {
         background-color: #fff !important;
       }
     }
-    .search-field { width: 100%; 
-      ::ng-deep .mat-mdc-text-field-wrapper {
-        background-color: #fff !important;
+    .filter-field { 
+      width: 220px;
+      @media (max-width: 600px) {
+        width: 100%;
       }
     }
-    .filter-field { width: 250px; }
-    .status-filter { width: 140px; }
+    .status-filter { 
+      width: 140px;
+      @media (max-width: 600px) {
+        width: 100%;
+      }
+    }
     .rounded-btn { 
       border-radius: 50px !important; 
       height: 44px; 
-      padding: 0 24px; 
+      padding: 0 20px; 
       font-weight: 600;
       display: inline-flex !important;
       align-items: center;
       justify-content: center;
       gap: 8px;
       overflow: visible !important;
+      &.search-btn {
+        min-width: 52px;
+        width: 52px;
+        height: 44px;
+        padding: 0;
+        background-color: #2C5F5D !important;
+        color: #ffffff !important;
+        border: none !important;
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px !important;
+        
+        mat-icon {
+          margin: 0 !important;
+          font-size: 20px !important;
+          width: 20px !important;
+          height: 20px !important;
+          color: #ffffff !important;
+        }
+      }
     }
     .rounded-btn mat-icon { 
       margin: 0 !important; 
@@ -176,13 +241,13 @@ import { Center } from '../../../core/models/center.model';
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      color: #2C5F5D;
+      color: #1A73E8;
       font-weight: 500;
       cursor: pointer;
       text-decoration: none;
       transition: color 0.2s;
     }
-    .name-link:hover:not([disabled]) { color: #C9A96E; text-decoration: underline; }
+    .name-link:hover:not([disabled]) { color: #1557B0; text-decoration: underline; }
     .name-link[disabled] { cursor: default; opacity: 0.7; }
 
     .center-name-tag {
@@ -206,13 +271,19 @@ import { Center } from '../../../core/models/center.model';
     .bg-white { 
       background-color: #fff !important; 
       color: #2C5F5D !important; 
-      border: 1px solid #d1d1d1 !important;
+      border: 1px solid #E2DDD6 !important;
       box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
     }
-    .actions-cell { display: flex; gap: 8px; align-items: center; }
+    .actions-cell { 
+      display: flex; 
+      gap: 12px; 
+      align-items: center; 
+      justify-content: center;
+      width: 100%;
+    }
     .compact-toggle {
-      transform: scale(0.8);
-      transform-origin: center;
+      transform: scale(0.85);
+      margin: 0;
     }
   `]
 })
@@ -248,9 +319,14 @@ export class TherapistListComponent implements OnInit {
       { key: 'phoneNumber', label: 'Phone Number' },
       { key: 'gender', label: 'Gender' },
       { key: 'experienceYears', label: 'Experience (Yrs)' },
-      { key: 'status', label: 'Status', template: this.statusTpl },
-      { key: 'actions', label: 'Actions', template: this.actionsTpl }
+      { key: 'status', label: 'Status', template: this.statusTpl }
     ];
+
+    const user = this.authService.getCurrentUser();
+    if (user?.role !== 'Receptionist' && user?.role !== 'User') {
+      this.columns.push({ key: 'actions', label: 'Actions', template: this.actionsTpl });
+    }
+
     this.loadData();
     this.loadCenters();
 
@@ -288,7 +364,7 @@ export class TherapistListComponent implements OnInit {
   }
 
   loadCenters() {
-    this.centersService.getAll({ limit: 100 }).subscribe(res => {
+    this.centersService.getAll({ limit: 100 }).subscribe((res: ApiResponse<any>) => {
       this.centers.set(res.data?.data || []);
     });
   }
@@ -319,7 +395,7 @@ export class TherapistListComponent implements OnInit {
     }
 
     this.service.getAll(params).subscribe({
-      next: (res) => {
+      next: (res: ApiResponse<any>) => {
         this.dataSource.data = res.data?.data || [];
         this.totalCount.set(res.data?.pagination?.total || 0);
         this.loading.set(false);
@@ -336,7 +412,7 @@ export class TherapistListComponent implements OnInit {
 
   openForm(therapist?: any) {
     const ref = this.dialog.open(TherapistFormComponent, { width: '560px', data: therapist });
-    ref.afterClosed().subscribe(res => {
+    ref.afterClosed().subscribe((res: any) => {
       if (res) this.loadData();
     });
   }
@@ -347,7 +423,7 @@ export class TherapistListComponent implements OnInit {
     this.activeDetailId.set(therapist.therapistId);
 
     this.service.getById(therapist.therapistId).subscribe({
-      next: (res) => {
+      next: (res: ApiResponse<any>) => {
         this.detailLoading.set(false);
         this.activeDetailId.set(null);
         this.dialog.open(TherapistDetailComponent, {
@@ -374,7 +450,7 @@ export class TherapistListComponent implements OnInit {
           confirmColor: 'warn' 
         }
       });
-      ref.afterClosed().subscribe(res => {
+      ref.afterClosed().subscribe((res: any) => {
         if (res) {
           this.performStatusUpdate(therapist, false);
         } else {
@@ -393,7 +469,7 @@ export class TherapistListComponent implements OnInit {
         this.notify.success(`${therapist.firstName} ${action} successfully`);
         this.loadData();
       },
-      error: (err) => {
+      error: (err: any) => {
         this.notify.error(err?.error?.message || `Failed to ${newStatus ? 'activate' : 'deactivate'}`);
         this.loadData();
       }

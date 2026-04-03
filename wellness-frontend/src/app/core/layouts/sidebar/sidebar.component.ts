@@ -17,6 +17,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 })
 export class SidebarComponent {
   collapsed = input<boolean>(false);
+  mobileOpen = input<boolean>(false);
   toggle = output<void>();
 
   private auth = inject(AuthService);

@@ -66,6 +66,12 @@ $spacing-10:  2.5rem;
 $spacing-12:  3rem;
 $spacing-16:  4rem;
 
+// ─── Breakpoints ─────────────────────────────────────────────────────────────
+$breakpoint-sm: 640px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1280px;
+
 // ─── Layout ──────────────────────────────────────────────────────────────────
 $sidebar-width:           260px;
 $sidebar-collapsed-width: 72px;

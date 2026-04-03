@@ -33,15 +33,15 @@ export interface ConfirmDialogData {
   `,
   styles: [`
     .confirm-message-container {
-      padding: 8px 0;
+      padding: 16px 24px;
       display: flex;
       flex-direction: column;
       justify-content: center;
     }
     .confirm-message {
       margin: 0;
-      line-height: 1.5;
-      color: #444;
+      line-height: 1.6;
+      color: #4B5563;
       font-size: 15px;
       text-align: left;
     }

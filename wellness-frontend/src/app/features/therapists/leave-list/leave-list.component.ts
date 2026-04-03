@@ -10,20 +10,50 @@ import { DataTableComponent, TableColumn } from '../../../shared/components/data
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { LeaveFormComponent } from './leave-form.component';
 import { LeavesService } from '../../../core/services/leaves.service';
+import { CentersService } from '../../../core/services/centers.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { HasPermissionDirective } from '../../../core/directives/has-permission.directive';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-leave-list',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, MatInputModule, MatDialogModule, MatTooltipModule, ReactiveFormsModule, DataTableComponent, HasPermissionDirective, DatePipe],
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatInputModule, MatDialogModule, MatSelectModule, MatTooltipModule, ReactiveFormsModule, DataTableComponent, HasPermissionDirective, DatePipe],
   template: `
     <div class="page-header">
       <h1 class="font-display text-3xl">Therapist Leaves</h1>
       <button *hasPermission="['Leaves', 'create']" mat-raised-button color="primary" (click)="openForm()" class="bg-white rounded-btn">
         <mat-icon>add</mat-icon> Register Leave
       </button>
+    </div>
+
+    <div class="filters-bar mb-4">
+      <div class="search-group">
+        <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
+          <mat-label>Search Therapist Name</mat-label>
+          <input matInput [formControl]="searchControl" (keyup.enter)="loadData()">
+        </mat-form-field>
+        <button mat-raised-button color="primary" class="rounded-btn search-btn" (click)="loadData()" matTooltip="Search">
+           <mat-icon>search</mat-icon> 
+        </button>
+      </div>
+
+      @if (!isReceptionist()) {
+        <div class="right-filters">
+          <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+            <mat-label>Filter by Center</mat-label>
+            <mat-select [formControl]="centerFilter">
+              <mat-option [value]="null">All Centers</mat-option>
+              @for (c of centers(); track c.centerId) {
+                <mat-option [value]="c.centerId">{{ c.name }}</mat-option>
+              }
+            </mat-select>
+            <mat-icon matPrefix>storefront</mat-icon>
+          </mat-form-field>
+        </div>
+      }
     </div>
 
     <app-data-table
@@ -65,6 +95,30 @@ import { MatTableDataSource } from '@angular/material/table';
       justify-content: center;
       gap: 8px;
     }
+    .filters-bar { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+    .search-group { display: flex; gap: 12px; align-items: center; flex: 1; min-width: 300px; max-width: 500px; }
+    .search-field { 
+      flex: 1;
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        background-color: #fff !important;
+      }
+    }
+    .right-filters { display: flex; gap: 16px; margin-left: auto; align-items: center; }
+    .filter-field { 
+      width: 240px; 
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        background-color: #fff !important;
+      }
+    }
+    .search-btn {
+      min-width: 52px !important;
+      width: 52px !important;
+      padding: 0 !important;
+      border-radius: 8px !important;
+      background-color: #2C5F5D !important;
+      color: #fff !important;
+      mat-icon { margin: 0 !important; font-size: 20px !important; width: 20px !important; height: 20px !important; }
+    }
     .actions-cell { display: flex; gap: 4px; }
   `]
 })
@@ -73,6 +127,8 @@ export class LeaveListComponent implements OnInit {
   @ViewChild('actionsTpl', { static: true }) actionsTpl!: TemplateRef<any>;
 
   private service = inject(LeavesService);
+  private centersService = inject(CentersService);
+  private auth = inject(AuthService);
   private dialog = inject(MatDialog);
   private notify = inject(NotificationService);
 
@@ -80,6 +136,12 @@ export class LeaveListComponent implements OnInit {
   dataSource = new MatTableDataSource<any>([]);
   totalCount = signal(0);
   columns: TableColumn[] = [];
+
+  centers = signal<any[]>([]);
+  searchControl = new FormControl('');
+  centerFilter = new FormControl<number | null>(null);
+
+  isReceptionist = () => this.auth.currentUser()?.role === 'Receptionist';
 
   ngOnInit() {
     this.columns = [
@@ -89,6 +151,14 @@ export class LeaveListComponent implements OnInit {
       { key: 'status', label: 'Status' },
       { key: 'actions', label: 'Actions', template: this.actionsTpl }
     ];
+
+    if (!this.isReceptionist()) {
+      this.centersService.getAll({ limit: 100 }).subscribe(res => {
+        this.centers.set(res.data?.data || []);
+      });
+    }
+
+    this.centerFilter.valueChanges.subscribe(() => this.loadData());
     this.loadData();
   }
 
@@ -106,12 +176,14 @@ export class LeaveListComponent implements OnInit {
 
   loadData() {
     this.loading.set(true);
-    this.service.getAll().subscribe({
+    const params: any = {
+      search: this.searchControl.value || '',
+      centerId: this.centerFilter.value || ''
+    };
+
+    this.service.getAll(params).subscribe({
       next: (res: any) => {
-
         const rawData = res.data?.data || [];
-
-        // ✅ Transform data here
         const formattedData = rawData.map((item: any) => ({
           ...item,
           therapistName: item.therapist
@@ -120,7 +192,6 @@ export class LeaveListComponent implements OnInit {
         }));
 
         this.dataSource.data = formattedData;
-
         this.totalCount.set(res.data?.pagination?.total || 0);
         this.loading.set(false);
       },

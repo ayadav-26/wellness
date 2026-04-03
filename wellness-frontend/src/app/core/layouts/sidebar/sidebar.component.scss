@@ -35,6 +35,28 @@
       justify-content: center;
     }
   }
+
+  @include respond-to('md') {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    width: 280px;
+    transform: translateX(-100%);
+    box-shadow: $shadow-xl;
+
+    &.mobile-open {
+      transform: translateX(0);
+    }
+    
+    &.collapsed {
+      width: 280px; /* on mobile we don't really want a collapsed mini-bar */
+      
+      .brand-name, .nav-label, .user-details {
+        display: block;
+      }
+    }
+  }
 }
 
 .sidebar-header {

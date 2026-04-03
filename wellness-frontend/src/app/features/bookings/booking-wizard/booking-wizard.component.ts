@@ -131,24 +131,22 @@ import { Router, ActivatedRoute } from '@angular/router';
         <ng-template matStepLabel>Your Information</ng-template>
         <form [formGroup]="step3" class="step-content">
           <div class="info-form-container">
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-form-field appearance="outline">
               <mat-label>Your Name</mat-label>
-              <input matInput formControlName="customerName" placeholder="Full Name" maxlength="50" />
               <mat-icon matPrefix class="material-symbols-outlined">person</mat-icon>
+              <input matInput formControlName="customerName" placeholder="Full Name" maxlength="50" />
             </mat-form-field>
 
             <div class="phone-row">
-              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="region-field">
+              <mat-form-field appearance="outline" class="region-field">
                 <mat-label>Region</mat-label>
-                <mat-select formControlName="region">
-                  <mat-option value="+91">+91 (IN)</mat-option>
-                </mat-select>
+                <input matInput value="+91" readonly tabindex="-1" />
               </mat-form-field>
               
-              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="phone-field">
+              <mat-form-field appearance="outline" class="phone-field">
                 <mat-label>Phone Number</mat-label>
-                <input matInput formControlName="customerPhone" placeholder="10-digit mobile number" maxlength="10" />
                 <mat-icon matPrefix class="material-symbols-outlined">phone</mat-icon>
+                <input matInput formControlName="customerPhone" placeholder="10-digit mobile number" maxlength="10" />
                 @if (step3.get('customerPhone')?.hasError('required') && step3.get('customerPhone')?.touched) {
                   <mat-error>Required</mat-error>
                 } @else if (step3.get('customerPhone')?.hasError('invalidPhone')) {
@@ -159,10 +157,10 @@ import { Router, ActivatedRoute } from '@angular/router';
               </mat-form-field>
             </div>
 
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-form-field appearance="outline">
               <mat-label>Email Address</mat-label>
-              <input matInput formControlName="customerEmail" type="email" placeholder="example@gmail.com" maxlength="100" />
               <mat-icon matPrefix class="material-symbols-outlined">mail</mat-icon>
+              <input matInput formControlName="customerEmail" type="email" placeholder="example@gmail.com" maxlength="100" />
             </mat-form-field>
           </div>
           <div class="stepper-actions flex justify-center mt-8">
@@ -223,10 +221,25 @@ import { Router, ActivatedRoute } from '@angular/router';
     .text-secondary { color: #666; margin-top: 4px; }
     .wizard-stepper { background: transparent; }
     .step-content { padding: 32px 0; max-width: 800px; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-    .full-width { grid-column: span 2; }
-    .stepper-actions { margin-top: 32px; display: flex; gap: 16px; }
-    .date-time-grid { display: grid; grid-template-columns: 350px 1fr; gap: 40px; }
+    .form-grid { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 24px; 
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+      }
+    }
+    .full-width { grid-column: span 2; @media (max-width: 768px) { grid-column: span 1; } }
+    .stepper-actions { margin-top: 32px; display: flex; gap: 16px; flex-wrap: wrap; }
+    .date-time-grid { 
+      display: grid; 
+      grid-template-columns: 350px 1fr; 
+      gap: 40px; 
+      @media (max-width: 992px) {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+    }
     
     .slots-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
     .slots-header h3 { margin: 0; }
@@ -253,12 +266,41 @@ import { Router, ActivatedRoute } from '@angular/router';
     .info-form-container { 
       display: flex; flex-direction: column; gap: 20px; max-width: 500px; margin: 0 auto;
       padding: 0 32px;
+      @media (max-width: 600px) {
+        padding: 0 16px;
+      }
     }
-    .phone-row { display: flex; gap: 16px; align-items: flex-start; width: 100%; }
-    .region-field { width: 130px !important; flex-shrink: 0; }
-    .phone-field { flex: 1; }
+    .phone-row { 
+      display: flex; gap: 16px; align-items: flex-start; width: 100%; 
+      @media (max-width: 480px) {
+        flex-direction: column;
+        gap: 0;
+      }
+    }
+    .region-field { 
+      width: 130px !important; flex-shrink: 0; 
+      @media (max-width: 480px) { width: 100% !important; }
+    }
+    .phone-field { 
+      flex: 1; 
+      @media (max-width: 480px) { width: 100% !important; }
+    }
     .info-form-container > mat-form-field { width: 100%; }
     .mat-icon { font-family: 'Material Symbols Outlined' !important; }
+    
+    ::ng-deep .mat-mdc-form-field-icon-prefix {
+      padding: 0 16px 0 0 !important;
+      color: #2C5F5D;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      min-width: 32px !important;
+    }
+    
+    ::ng-deep .mat-mdc-form-field-infix {
+      display: flex !important;
+      align-items: center !important;
+    }
   `]
 })
 export class BookingWizardComponent implements OnInit {
@@ -441,11 +483,11 @@ export class BookingWizardComponent implements OnInit {
           customerEmail: b.customerEmail
         });
 
-        // Strip region prefix if it's still joined in customerPhone
-        if (b.customerPhone && b.customerPhone.startsWith('+')) {
+        // Phone Number Mapping (Standardizing to 10 digits)
+        if (b.customerPhone) {
           this.step3.patchValue({
             customerPhone: b.customerPhone.slice(-10),
-            region: b.customerPhone.slice(0, -10)
+            region: '+91'
           });
         }
 
@@ -471,7 +513,7 @@ export class BookingWizardComponent implements OnInit {
       therapistGenderPreference: this.step1.get('genderPreference')?.value,
       customerName: this.step3.get('customerName')?.value,
       customerPhone: this.step3.get('customerPhone')?.value,
-      region: this.step3.get('region')?.value,
+      region: '+91',
       customerEmail: this.step3.get('customerEmail')?.value
     };
 

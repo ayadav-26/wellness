@@ -14,10 +14,12 @@ import { CenterFormComponent } from '../center-form/center-form.component';
 import { CenterDetailsComponent } from '../center-details/center-details.component';
 import { CentersService } from '../../../core/services/centers.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { HasPermissionDirective } from '../../../core/directives/has-permission.directive';
 import { MatTableDataSource } from '@angular/material/table';
 import { Center } from '../../../core/models/center.model';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { ApiResponse } from '../../../core/models/api-response.model';
 
 @Component({
   selector: 'app-center-list',
@@ -46,16 +48,15 @@ import { MatTooltipModule } from '@angular/material/tooltip';
       <div class="search-group flex items-center gap-2">
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-field flex-1 mb-0">
           <mat-label>Search by Name, City or Contact</mat-label>
-          <input matInput [formControl]="searchControl" placeholder="Enter keyword..." (keyup.enter)="onSearch()">
-          <mat-icon matPrefix>search</mat-icon>
+          <input matInput [formControl]="searchControl" (keyup.enter)="onSearch()">
           @if (searchControl.value) {
             <button mat-icon-button matSuffix (click)="clearSearch()" aria-label="Clear search">
               <mat-icon>close</mat-icon>
             </button>
           }
         </mat-form-field>
-        <button mat-raised-button color="primary" class="rounded-btn bg-white" (click)="onSearch()">
-          <mat-icon>search</mat-icon> Search
+        <button mat-raised-button color="primary" class="rounded-btn search-btn" (click)="onSearch()" matTooltip="Search">
+           <mat-icon>search</mat-icon> 
         </button>
       </div>
     </div>
@@ -115,38 +116,88 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   styles: [`
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
     h1 { color: #1A1A1A; margin: 0; }
-    .search-field { 
-      width: 100%; 
-      max-width: 400px; 
-      ::ng-deep .mat-mdc-text-field-wrapper {
-        background-color: #fff !important;
+    .filters-bar { 
+      display: flex; 
+      align-items: center; 
+      gap: 16px; 
+      flex-wrap: wrap; 
+      margin-bottom: 24px;
+      min-height: 56px;
+    }
+    .search-group { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      flex: 1; 
+      max-width: 500px;
+      min-width: 300px;
+      @media (max-width: 600px) {
+        max-width: 100%;
+        min-width: 100%;
       }
     }
-    .filters-bar { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-    .search-group { display: flex; align-items: center; gap: 8px; flex: 1; max-width: 450px; }
+    .search-field { 
+      min-width: 250px; 
+    }
     .rounded-btn { 
       border-radius: 50px !important; 
       height: 44px; 
-      padding: 0 24px; 
+      padding: 0 20px; 
       font-weight: 600;
       display: inline-flex !important;
       align-items: center;
       justify-content: center;
       gap: 8px;
+      overflow: visible !important;
+      &.search-btn {
+        min-width: 52px;
+        width: 52px;
+        height: 44px;
+        padding: 0;
+        background-color: #2C5F5D !important;
+        color: #ffffff !important;
+        border: none !important;
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px !important;
+        
+        mat-icon {
+          margin: 0 !important;
+          font-size: 20px !important;
+          width: 20px !important;
+          height: 20px !important;
+          color: #ffffff !important;
+        }
+      }
+    }
+    .rounded-btn mat-icon { 
+      margin: 0 !important; 
+      font-size: 20px !important; 
+      width: 20px !important; 
+      height: 20px !important;
+      line-height: 20px !important;
+      display: block !important;
     }
     .bg-white { 
       background-color: #fff !important; 
       color: #2C5F5D !important; 
-      border: 1px solid #d1d1d1 !important;
+      border: 1px solid #E2DDD6 !important;
       box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
     }
-    .actions-cell { display: flex; gap: 4px; }
+    .actions-cell { 
+      display: flex; 
+      gap: 12px; 
+      justify-content: center; 
+      align-items: center;
+      width: 100%;
+    }
 
     .name-link {
       background: transparent;
       border: none;
       padding: 0;
-      color: #2C5F5D;
+      color: #1A73E8;
       font-weight: 600;
       cursor: pointer;
       display: flex;
@@ -161,8 +212,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
       text-underline-offset: 3px;
       transition: color 0.2s, text-decoration-color 0.2s;
       &:hover:not(:disabled) {
-        color: #1b5e44;
-        text-decoration-color: #1b5e44;
+        color: #1557B0;
+        text-decoration-color: #1557B0;
       }
       &:disabled {
         cursor: default;
@@ -210,6 +261,7 @@ export class CenterListComponent implements OnInit {
   days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
   private centersService = inject(CentersService);
+  private authService = inject(AuthService);
   private dialog = inject(MatDialog);
   private notify = inject(NotificationService);
 
@@ -231,9 +283,13 @@ export class CenterListComponent implements OnInit {
       { key: 'city', label: 'City' },
       { key: 'openingTime', label: 'Opening Time', template: this.timeTpl },
       { key: 'closingTime', label: 'Closing Time', template: this.timeTpl },
-      { key: 'status', label: 'Status', template: this.statusTpl },
-      { key: 'actions', label: 'Actions', template: this.actionsTpl }
+      { key: 'status', label: 'Status', template: this.statusTpl }
     ];
+
+    const user = this.authService.getCurrentUser();
+    if (user?.role !== 'Receptionist' && user?.role !== 'User') {
+      this.columns.push({ key: 'actions', label: 'Actions', template: this.actionsTpl });
+    }
 
     this.loadData();
 
@@ -274,7 +330,7 @@ export class CenterListComponent implements OnInit {
     }
 
     this.centersService.getAll(params).subscribe({
-      next: (res) => {
+      next: (res: ApiResponse<any>) => {
         this.dataSource.data = res.data?.data || [];
         this.totalCount.set(res.data?.pagination?.total || 0);
         this.loading.set(false);
@@ -290,7 +346,7 @@ export class CenterListComponent implements OnInit {
 
   openForm(center?: Center) {
     const ref = this.dialog.open(CenterFormComponent, { width: '560px', data: center });
-    ref.afterClosed().subscribe(res => {
+    ref.afterClosed().subscribe((res: any) => {
       if (res) this.loadData();
     });
   }
@@ -301,7 +357,7 @@ export class CenterListComponent implements OnInit {
       data: { title: 'Delete Center', message: `Are you sure you want to delete ${center.name}?`, confirmLabel: 'Delete', confirmColor: 'warn' }
     });
 
-    ref.afterClosed().subscribe(res => {
+    ref.afterClosed().subscribe((res: any) => {
       if (res) {
         this.centersService.delete(center.centerId).subscribe(() => {
           this.notify.success('Center deleted successfully');
@@ -317,7 +373,7 @@ export class CenterListComponent implements OnInit {
     this.activeId.set(id);
 
     this.centersService.getById(id).subscribe({
-      next: (res) => {
+      next: (res: ApiResponse<any>) => {
         this.loadingDetails.set(false);
         this.activeId.set(null);
         this.dialog.open(CenterDetailsComponent, {

@@ -77,9 +77,7 @@ import { ImageCropperDialogComponent } from '../../../shared/components/image-cr
           <div style="width: 140px; flex-shrink: 0;">
             <mat-form-field appearance="outline" style="width: 100%;">
               <mat-label>Region</mat-label>
-              <mat-select formControlName="region">
-                <mat-option value="+91">+91</mat-option>
-              </mat-select>
+              <input matInput value="+91" readonly tabindex="-1" />
             </mat-form-field>
           </div>
           <div style="flex: 1; min-width: 0;">
@@ -437,14 +435,12 @@ export class UserFormComponent implements OnInit {
       centerId: user.centerId
     });
 
-    if (user.phoneNumber && user.phoneNumber.startsWith('+')) {
-      const local = user.phoneNumber.slice(-10);
-      const region = user.phoneNumber.slice(0, -10);
-      this.form.patchValue({ phoneNumber: local, region: region || '+91' }, { emitEvent: false });
-    } else if (user.phoneNumber && user.phoneNumber.length > 10) {
-      this.form.patchValue({ phoneNumber: user.phoneNumber.slice(-10), region: user.region || '+91' }, { emitEvent: false });
-    } else {
-      this.form.patchValue({ phoneNumber: user.phoneNumber, region: user.region || '+91' }, { emitEvent: false });
+    // Phone Number Mapping (Standardizing to 10 digits)
+    if (user.phoneNumber) {
+      this.form.patchValue({
+        phoneNumber: user.phoneNumber.slice(-10),
+        region: '+91'
+      }, { emitEvent: false });
     }
   }
 
@@ -452,7 +448,7 @@ export class UserFormComponent implements OnInit {
     if (this.form.invalid) return;
     this.submitting.set(true);
 
-    const formVal = this.form.getRawValue();
+    const formVal = { ...this.form.getRawValue(), region: '+91' };
     const isRec = formVal.role === 'Receptionist';
 
     const formData = new FormData();

@@ -18,12 +18,14 @@ import { CenterDetail } from '../../../core/models/center.model';
         <div class="header-icon">
           <mat-icon>location_city</mat-icon>
         </div>
-        <div>
-          <h2 mat-dialog-title>{{ center.name }}</h2>
-          <span class="status-chip" [class.active]="center.status">
-            <span class="status-dot"></span>
-            {{ center.status ? 'Active' : 'Inactive' }}
-          </span>
+        <div class="header-text">
+          <div class="header-title-row">
+            <h2 mat-dialog-title>{{ center.name }}</h2>
+            <span class="status-chip" [class.active]="center.status">
+              <span class="status-dot"></span>
+              {{ center.status ? 'Active' : 'Inactive' }}
+            </span>
+          </div>
         </div>
       </div>
       <button mat-icon-button (click)="dialogRef.close()" class="close-btn">
@@ -171,42 +173,65 @@ import { CenterDetail } from '../../../core/models/center.model';
     .dialog-header {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      padding: 20px 24px 0;
+      align-items: center;
+      padding: 10px 16px;
       background: linear-gradient(135deg, #f0f9f6 0%, #e8f5f0 100%);
       border-bottom: 1px solid #e0e0e0;
-      padding-bottom: 16px;
+      min-height: 88px;
     }
 
     .header-content {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 10px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .header-text {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .header-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
     .header-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
       background: linear-gradient(135deg, #4caf8a, #2e7d5e);
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 12px rgba(76, 175, 138, 0.3);
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(76, 175, 138, 0.3);
       mat-icon {
         color: white;
-        font-size: 24px;
-        width: 24px;
-        height: 24px;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
       }
     }
 
     h2[mat-dialog-title] {
-      margin: 0 0 6px;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 22px;
-      font-weight: 600;
+      margin: 0 !important;
+      padding: 0 !important;
+      font-family: 'Inter', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
       color: #1a1a1a;
+      line-height: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 300px;
+      display: flex;
+      align-items: center;
     }
 
     .status-chip {
@@ -237,12 +262,16 @@ import { CenterDetail } from '../../../core/models/center.model';
     }
 
     .dialog-content {
-      padding: 20px 24px !important;
-      max-height: 55vh;
+      padding: 16px 20px !important;
+      max-height: 60vh;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 12px;
+      @media (max-width: 600px) {
+        max-height: 65vh;
+        padding: 12px 14px !important;
+      }
     }
 
     .section-card {
@@ -295,7 +324,10 @@ import { CenterDetail } from '../../../core/models/center.model';
     .info-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap: 10px;
+      @media (max-width: 480px) {
+        grid-template-columns: 1fr;
+      }
     }
 
     .info-item {
@@ -368,7 +400,10 @@ import { CenterDetail } from '../../../core/models/center.model';
     .list-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      gap: 8px;
+      @media (max-width: 480px) {
+        grid-template-columns: 1fr;
+      }
     }
 
     .list-item {

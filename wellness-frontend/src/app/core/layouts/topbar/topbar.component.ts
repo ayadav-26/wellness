@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -16,6 +16,7 @@ import { AuthService } from '../../services/auth.service';
   styleUrls: ['./topbar.component.scss']
 })
 export class TopbarComponent {
+  toggleSidebar = output<void>();
   private auth = inject(AuthService);
   private router = inject(Router);
 

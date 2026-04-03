@@ -4,7 +4,7 @@
   } @else if (dataSource.data.length === 0) {
     <app-empty-state [message]="emptyMessage" />
   } @else {
-    <div class="table-scroll-area">
+    <div class="table-container desktop-view">
       <mat-table [dataSource]="dataSource">
         @for (col of columns; track col.key) {
           <ng-container [matColumnDef]="col.key">
@@ -29,6 +29,42 @@
         <mat-row *matRowDef="let row; columns: displayedColumns;"
                  (click)="rowClick.emit(row)" />
       </mat-table>
+    </div>
+
+    <!-- Mobile Card View -->
+    <div class="mobile-cards-view">
+      @for (row of dataSource.data; track $index) {
+        <div class="data-card" (click)="rowClick.emit(row)">
+          @for (col of columns; track col.key) {
+            @if (col.key !== 'actions') {
+              <div class="card-field">
+                <span class="field-label">{{ col.label }}</span>
+                <div class="field-value">
+                  @if (col.template) {
+                    <ng-container
+                      [ngTemplateOutlet]="col.template"
+                      [ngTemplateOutletContext]="{ $implicit: row[col.key], row: row }">
+                    </ng-container>
+                  } @else if (col.formatter) {
+                    {{ col.formatter(row) }}
+                  } @else {
+                    {{ row[col.key] }}
+                  }
+                </div>
+              </div>
+            }
+          }
+          <!-- Actions at the bottom of the card -->
+          @if (columns[columns.length - 1].key === 'actions') {
+            <div class="card-actions">
+              <ng-container
+                [ngTemplateOutlet]="columns[columns.length - 1].template"
+                [ngTemplateOutletContext]="{ $implicit: row['actions'], row: row }">
+              </ng-container>
+            </div>
+          }
+        </div>
+      }
     </div>
     <mat-paginator [length]="totalCount || dataSource.data.length"
                    [pageIndex]="pageIndex"

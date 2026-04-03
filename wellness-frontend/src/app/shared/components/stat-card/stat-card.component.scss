@@ -33,6 +33,10 @@
     color: #1A1A1A;
     line-height: 1;
     margin-bottom: $spacing-1;
+
+    @include respond-to('md') {
+      font-size: 2.5rem;
+    }
   }
 
   .stat-label {
@@ -41,6 +45,10 @@
     color: #333;
     line-height: 1.3;
     max-width: 140px;
+
+    @include respond-to('md') {
+      font-size: $text-sm;
+    }
   }
 
   .stat-icon-wrapper {
@@ -48,11 +56,22 @@
     width: 80px;
     height: 80px;
 
+    @include respond-to('md') {
+      width: 60px;
+      height: 60px;
+    }
+
     mat-icon {
       font-size: 72px;
       width: 72px;
       height: 72px;
       line-height: 1;
+
+      @include respond-to('md') {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+      }
     }
   }
 }

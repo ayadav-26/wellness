@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -18,15 +18,16 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
 import { TimePickerComponent } from '../../../shared/components/time-picker/time-picker.component';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 @Component({
   selector: 'app-therapist-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatButtonModule, MatInputModule, MatSelectModule, MatProgressSpinnerModule, MatTabsModule, MatIconModule, MatTooltipModule, MatDividerModule, TimePickerComponent],
+  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatButtonModule, MatInputModule, MatSelectModule, MatProgressSpinnerModule, MatTabsModule, MatIconModule, MatTooltipModule, MatDividerModule, TimePickerComponent, MatSlideToggleModule],
   template: `
     <h2 mat-dialog-title class="font-display">{{ data ? 'Edit Therapist' : 'Add Therapist' }}</h2>
     <mat-dialog-content>
-      <mat-tab-group>
+      <mat-tab-group #tabGroup>
         <mat-tab label="General Info">
           <form [formGroup]="form" class="flex-form p-4">
             <div class="form-row">
@@ -58,9 +59,7 @@ import { TimePickerComponent } from '../../../shared/components/time-picker/time
             <div class="form-row">
               <mat-form-field appearance="outline" style="flex: 0.3;">
                 <mat-label>Region</mat-label>
-                <mat-select formControlName="region">
-                  <mat-option value="+91">+91</mat-option>
-                </mat-select>
+                <input matInput value="+91" readonly tabindex="-1" />
               </mat-form-field>
               <mat-form-field appearance="outline" style="flex: 0.7;">
                 <mat-label>Phone Number</mat-label>
@@ -99,56 +98,35 @@ import { TimePickerComponent } from '../../../shared/components/time-picker/time
         <mat-tab label="Working Hours">
           <div class="hours-tab-content p-4">
             <div class="actions-header mb-4">
-              <p class="text-sm text-muted">Set working hours for each day. You can add multiple slots per day.</p>
-              <button mat-icon-button color="primary" type="button" (click)="showDaySelector = true" *ngIf="!showDaySelector" matTooltip="Add Working Day">
-                <mat-icon style="font-size: 32px; width: 32px; height: 32px;">add_circle</mat-icon>
-              </button>
-              
-              <div class="day-selector-row" *ngIf="showDaySelector">
-                <mat-form-field appearance="outline" class="compact-select">
-                  <mat-label>Select Day</mat-label>
-                  <mat-select #daySelect>
-                    @for (day of availableDays(); track day) {
-                      <mat-option [value]="day">{{ day }}</mat-option>
-                    }
-                  </mat-select>
-                </mat-form-field>
-                <button mat-icon-button color="primary" (click)="addNewDay(daySelect.value); showDaySelector = false">
-                  <mat-icon>check_circle</mat-icon>
-                </button>
-                <button mat-icon-button color="warn" (click)="showDaySelector = false">
-                  <mat-icon>cancel</mat-icon>
+              <div class="header-text">
+                <p class="text-sm font-semibold text-primary">Weekly Schedule</p>
+                <p class="text-xs text-muted">Toggle days to set availability.</p>
+              </div>
+              <div class="header-btns">
+                <button mat-stroked-button type="button" class="small-btn" (click)="selectWeekdays()">
+                  <mat-icon>calendar_view_week</mat-icon> Mon-Fri
                 </button>
               </div>
             </div>
             
-            <div class="days-list">
+            <div class="days-grid">
               @for (dayGroup of workingHours.controls; track dayGroup; let i = $index) {
-                <div [formGroup]="$any(dayGroup)" class="day-config-row">
-                  <div class="day-header">
-                    <div class="day-info">
-                      <span class="day-name">{{ dayGroup.get('dayOfWeek')?.value }}</span>
-                    </div>
-                    <button mat-icon-button color="warn" type="button" (click)="removeDay(i)" matTooltip="Remove entire day">
-                      <mat-icon>delete_outline</mat-icon>
-                    </button>
+                <div [formGroup]="$any(dayGroup)" class="day-row" [class.is-inactive]="!dayGroup.get('isActive')?.value">
+                  <div class="day-toggle-col">
+                    <mat-slide-toggle formControlName="isActive" color="primary"></mat-slide-toggle>
+                    <span class="day-label">{{ dayGroup.get('dayOfWeek')?.value }}</span>
                   </div>
 
-                  <div class="day-slots">
-                    <div class="slot-edit-row">
-                    <div class="time-inputs">
-                      <app-time-picker formControlName="start" label="Start"></app-time-picker>
-                      <app-time-picker formControlName="end" label="End"></app-time-picker>
-                    </div>
+                  <div class="day-time-col" *ngIf="dayGroup.get('isActive')?.value">
+                    <div class="time-stack">
+                      <app-time-picker formControlName="start" label="From"></app-time-picker>
+                      <app-time-picker formControlName="end" label="To"></app-time-picker>
                     </div>
                   </div>
-                </div>
-                <mat-divider></mat-divider>
-              }
-              @if (workingHours.length === 0) {
-                <div class="empty-hours">
-                  <mat-icon class="large-icon">schedule</mat-icon>
-                  <p>No working hours assigned yet.</p>
+                  
+                  <div class="day-status-col" *ngIf="!dayGroup.get('isActive')?.value">
+                    <span class="off-badge">Off Day</span>
+                  </div>
                 </div>
               }
             </div>
@@ -157,10 +135,24 @@ import { TimePickerComponent } from '../../../shared/components/time-picker/time
       </mat-tab-group>
     </mat-dialog-content>
     <mat-dialog-actions align="end">
-      <button mat-stroked-button mat-dialog-close>Cancel</button>
-      <button mat-raised-button color="primary" [disabled]="form.invalid || loading()" (click)="submit()">
-        @if (loading()) { <mat-spinner diameter="18"></mat-spinner> } @else { Save }
-      </button>
+      <!-- Tab 0: General Info -->
+      @if (tabGroup.selectedIndex === 0) {
+        <button mat-stroked-button mat-dialog-close>Cancel</button>
+        <button mat-raised-button color="primary" [disabled]="!isGeneralInfoValid()" (click)="tabGroup.selectedIndex = 1">
+          Next <mat-icon>arrow_forward</mat-icon>
+        </button>
+      }
+
+      <!-- Tab 1: Working Hours -->
+      @if (tabGroup.selectedIndex === 1) {
+        <button mat-stroked-button (click)="tabGroup.selectedIndex = 0">
+           <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div class="flex-spacer"></div>
+        <button mat-raised-button color="primary" [disabled]="form.invalid || loading()" (click)="submit()">
+          @if (loading()) { <mat-spinner diameter="18"></mat-spinner> } @else { Save }
+        </button>
+      }
     </mat-dialog-actions>
   `,
   styles: [`
@@ -168,25 +160,55 @@ import { TimePickerComponent } from '../../../shared/components/time-picker/time
     .form-row { display: flex; gap: 16px; }
     .form-row mat-form-field { flex: 1; }
     .p-4 { padding: 16px; }
-    .mb-4 { margin-bottom: 16px; }
-    .day-config-row { padding: 12px 0; }
-    .day-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .day-name { font-weight: 600; font-size: 14px; width: 100px; color: #1E3A38; }
-    .day-slots { display: flex; flex-direction: column; gap: 8px; padding-left: 24px; }
-    .slot-edit-row { display: flex; align-items: center; gap: 12px; }
-    .time-inputs { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .mb-4 { margin-bottom: 20px; }
+    
+    .actions-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 12px; }
+    .header-btns { display: flex; gap: 8px; }
+    .small-btn { height: 32px !important; font-size: 12px !important; line-height: 32px !important; padding: 0 12px !important; border-radius: 6px !important; .mat-icon { font-size: 18px; width: 18px; height: 18px; margin-right: 4px; } }
 
+    .days-grid { display: flex; flex-direction: column; gap: 8px; }
+    .day-row { display: flex; align-items: center; padding: 10px 16px; background: #f9f9f9; border-radius: 12px; transition: all 0.2s; border: 1px solid transparent; }
+    .day-row:hover { background: #fff; border-color: #e0e0e0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .day-row.is-inactive { opacity: 0.6; background: #fafafa; }
+    
+    .day-toggle-col { display: flex; align-items: center; gap: 12px; width: 160px; }
+    .day-label { font-weight: 600; color: #2C5F5D; font-size: 14px; }
+    
+    .day-time-col { flex: 1; animation: fadeIn 0.3s ease; }
+    .time-stack { display: flex; flex-direction: column; gap: 8px; }
+    
+    .day-status-col { flex: 1; display: flex; justify-content: center; }
+    .off-badge { background: #eee; color: #888; font-size: 11px; padding: 2px 10px; border-radius: 50px; font-weight: 500; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+
+    .text-primary { color: #2C5F5D; }
     .text-muted { color: #666; }
-    .text-sm { font-size: 12px; }
+    .text-sm { font-size: 13px; }
     .text-xs { font-size: 11px; }
-    .text-warn { color: #f44336; }
-    .day-info { display: flex; align-items: center; gap: 8px; }
-    .actions-header { display: flex; justify-content: space-between; align-items: flex-start; }
-    .day-selector-row { display: flex; align-items: center; gap: 8px; }
-    .compact-select { width: 150px; }
-    .empty-hours { display: flex; flex-direction: column; align-items: center; padding: 40px; color: #999; }
-    .large-icon { font-size: 48px; width: 48px; height: 48px; margin-bottom: 8px; opacity: 0.3; }
-    mat-tab-group { min-height: 400px; }
+    .font-semibold { font-weight: 600; }
+    .flex-spacer { flex: 1; }
+
+    mat-tab-group { min-height: 450px; }
+
+    ::ng-deep app-time-picker {
+      .time-picker-container {
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 8px !important;
+      }
+      .label { display: block !important; font-size: 10px !important; width: 30px !important; color: #777 !important; }
+      .time-card {
+        padding: 4px 8px !important;
+        background: #fff !important;
+        border: 1px solid #eee !important;
+        gap: 4px !important;
+        border-radius: 8px !important;
+      }
+      .time-field { width: 65px !important; }
+      .ampm-toggle { margin-left: 0 !important; gap: 2px !important; }
+      .ampm-toggle button { padding: 4px 8px !important; font-size: 11px !important; }
+    }
   `]
 })
 export class TherapistFormComponent implements OnInit {
@@ -201,12 +223,10 @@ export class TherapistFormComponent implements OnInit {
   loading = signal(false);
   centers = signal<Center[]>([]);
   skillsList = signal<Skill[]>([]);
-  showDaySelector = false;
 
-  availableDays = computed(() => {
-    const used = this.workingHours.value.map((h: any) => h.dayOfWeek);
-    return this.days.filter(d => !used.includes(d));
-  });
+
+
+  days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
   form = this.fb.group({
     firstName: [this.data?.firstName || '', [Validators.required, Validators.maxLength(50), CustomValidators.noWhitespace()]],
@@ -217,41 +237,39 @@ export class TherapistFormComponent implements OnInit {
     region: [this.data?.region || '+91', Validators.required],
     centerId: [this.data?.centerId || null, Validators.required],
     skillSet: [this.data?.skillSet || [], [Validators.required]],
-    workingHours: this.fb.array([])
+    workingHours: this.fb.array(this.days.map(day => this.createDayGroup(day)))
   });
 
-  days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  createDayGroup(day: string, active = false, start = '09:00', end = '18:00') {
+    return this.fb.group({
+      dayOfWeek: [day],
+      isActive: [active],
+      start: [start],
+      end: [end]
+    });
+  }
+
+
 
   get workingHours() {
     return this.form.get('workingHours') as FormArray;
   }
 
-  addNewDay(day: string) {
-    if (!day) return;
-    this.addDayConfig(day, '', '');
+  isGeneralInfoValid(): boolean {
+    const controls = ['firstName', 'lastName', 'gender', 'experienceYears', 'phoneNumber', 'centerId', 'skillSet'];
+    return controls.every(c => this.form.get(c)?.valid);
   }
 
-  removeDay(index: number) {
-    this.workingHours.removeAt(index);
-  }
-
-  addDayConfig(day: string, start: string = '', end: string = '') {
-    const dayGroup = this.fb.group({
-      dayOfWeek: [day],
-      start: [start, Validators.required],
-      end: [end, Validators.required]
+  selectWeekdays() {
+    this.workingHours.controls.forEach(control => {
+      const day = control.get('dayOfWeek')?.value;
+      if (['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].includes(day)) {
+        control.get('isActive')?.setValue(true);
+      }
     });
-    // Insert into correct order based on this.days
-    const dayOrder = this.days.indexOf(day);
-    let insertIndex = this.workingHours.length;
-    for (let i = 0; i < this.workingHours.length; i++) {
-        if (this.days.indexOf(this.workingHours.at(i).value.dayOfWeek) > dayOrder) {
-            insertIndex = i;
-            break;
-        }
-    }
-    this.workingHours.insert(insertIndex, dayGroup);
   }
+
+
 
   // Slots methods no longer needed as we use single start/end inputs
 
@@ -290,34 +308,28 @@ export class TherapistFormComponent implements OnInit {
       skillSet: therapist.skillSet || []
     });
 
-    // Phone & Region
-    if (therapist.phoneNumber && therapist.phoneNumber.startsWith('+')) {
-      const local = therapist.phoneNumber.slice(-10);
-      const region = therapist.phoneNumber.slice(0, -10);
+    // Phone & Region Mapping (Standardizing to 10 digits)
+    if (therapist.phoneNumber) {
       this.form.patchValue({
-        phoneNumber: local,
-        region: region || '+91'
+        phoneNumber: therapist.phoneNumber.slice(-10),
+        region: '+91'
       }, { emitEvent: false });
-    } else if (therapist.phoneNumber && therapist.phoneNumber.length > 10) {
-        this.form.patchValue({
-          phoneNumber: therapist.phoneNumber.slice(-10),
-          region: therapist.region || '+91'
-        }, { emitEvent: false });
-    } else {
-        this.form.patchValue({
-          phoneNumber: therapist.phoneNumber,
-          region: therapist.region || '+91'
-        }, { emitEvent: false });
     }
 
     // Working Hours
-    this.workingHours.clear();
+    // Working Hours Mapping
     if (therapist.workingHours) {
-      this.days.forEach(day => {
+      this.workingHours.controls.forEach(control => {
+        const day = control.get('dayOfWeek')?.value;
         const existing = therapist.workingHours.find((h: any) => h.dayOfWeek === day);
-        if (existing) {
-          const firstSlot = existing.slots && existing.slots.length > 0 ? existing.slots[0] : {start: '', end: ''};
-          this.addDayConfig(day, firstSlot.start, firstSlot.end);
+        if (existing && existing.slots && existing.slots.length > 0) {
+          control.patchValue({
+            isActive: true,
+            start: existing.slots[0].start,
+            end: existing.slots[0].end
+          });
+        } else {
+          control.patchValue({ isActive: false });
         }
       });
     }
@@ -328,18 +340,21 @@ export class TherapistFormComponent implements OnInit {
     this.loading.set(true);
 
     const rawValue = this.form.value as any;
-    
+
     // Transform back to slots structure for database compatibility if needed, 
     // or update the structure to match the new simple model.
     const payload = {
       ...rawValue,
-      workingHours: rawValue.workingHours.map((wh: any) => ({
-        dayOfWeek: wh.dayOfWeek,
-        slots: [{ start: wh.start, end: wh.end }]
-      }))
+      region: '+91',
+      workingHours: rawValue.workingHours
+        .filter((wh: any) => wh.isActive)
+        .map((wh: any) => ({
+          dayOfWeek: wh.dayOfWeek,
+          slots: [{ start: wh.start, end: wh.end }]
+        }))
     };
 
-    const request = this.data?.therapistId 
+    const request = this.data?.therapistId
       ? this.service.update(this.data.therapistId, payload as any)
       : this.service.create(payload as any);
 

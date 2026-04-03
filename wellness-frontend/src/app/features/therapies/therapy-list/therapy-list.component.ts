@@ -21,6 +21,7 @@ import { HasPermissionDirective } from '../../../core/directives/has-permission.
 import { DurationFormatPipe } from '../../../core/pipes/duration-format.pipe';
 import { MatTableDataSource } from '@angular/material/table';
 import { Therapy } from '../../../core/models/therapy.model';
+import { ApiResponse } from '../../../core/models/api-response.model';
 
 @Component({
   selector: 'app-therapy-list',
@@ -45,16 +46,15 @@ import { Therapy } from '../../../core/models/therapy.model';
       <div class="search-group flex items-center gap-2">
         <mat-form-field appearance="outline" class="search-field flex-1 mb-0" subscriptSizing="dynamic">
           <mat-label>Search Therapy</mat-label>
-          <input matInput [formControl]="searchControl" placeholder="Enter keyword..." (keyup.enter)="onSearch()">
-          <mat-icon matPrefix>search</mat-icon>
+          <input matInput [formControl]="searchControl" (keyup.enter)="onSearch()">
           @if (searchControl.value) {
             <button matSuffix mat-icon-button aria-label="Clear" (click)="clearSearch()">
               <mat-icon>close</mat-icon>
             </button>
           }
         </mat-form-field>
-        <button mat-raised-button color="primary" class="rounded-btn bg-white" (click)="onSearch()">
-          <mat-icon>search</mat-icon> Search
+        <button mat-raised-button color="primary" class="rounded-btn search-btn" (click)="onSearch()" matTooltip="Search">
+           <mat-icon>search</mat-icon> 
         </button>
       </div>
 
@@ -123,16 +123,47 @@ import { Therapy } from '../../../core/models/therapy.model';
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
     h1 { color: #1A1A1A; margin: 0; font-family: 'Inter', sans-serif; }
     .header-actions { display: flex; gap: 8px; }
-    .filters-bar { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
-    .search-group { display: flex; align-items: center; gap: 8px; flex: 1; max-width: 450px; }
-    .search-field { 
-      width: 100%; 
-      max-width: 400px; 
-      ::ng-deep .mat-mdc-text-field-wrapper {
-        background-color: #fff !important;
+    .filters-bar { 
+      display: flex; 
+      gap: 16px; 
+      align-items: center; 
+      flex-wrap: wrap; 
+      margin-bottom: 24px;
+      min-height: 56px;
+    }
+    .search-group { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      flex: 1; 
+      max-width: 500px;
+      min-width: 300px;
+      @media (max-width: 768px) {
+        max-width: 100%;
+        min-width: 100%;
       }
     }
-    .right-filters { display: flex; gap: 16px; margin-left: auto; align-items: center; 
+    .search-field { 
+      flex: 1;
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        background-color: #fff !important;
+        height: 44px !important;
+      }
+      ::ng-deep .mat-mdc-form-field-infix {
+        padding-top: 11px !important;
+        padding-bottom: 11px !important;
+        min-height: 44px !important;
+      }
+    }
+    .right-filters { 
+      display: flex; 
+      gap: 12px; 
+      margin-left: auto; 
+      align-items: center;
+      @media (max-width: 768px) {
+        margin-left: 0;
+        width: 100%;
+      }
       ::ng-deep .mat-mdc-text-field-wrapper {
         background-color: #fff !important;
       }
@@ -140,13 +171,33 @@ import { Therapy } from '../../../core/models/therapy.model';
     .rounded-btn { 
       border-radius: 50px !important; 
       height: 44px; 
-      padding: 0 24px; 
+      padding: 0 20px; 
       font-weight: 600;
       display: inline-flex !important;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      overflow: visible !important;
+      &.search-btn {
+        min-width: 52px;
+        width: 52px;
+        height: 44px;
+        padding: 0;
+        background-color: #2C5F5D !important;
+        color: #ffffff !important;
+        border: none !important;
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px !important;
+        
+        mat-icon {
+          margin: 0 !important;
+          font-size: 20px !important;
+          width: 20px !important;
+          height: 20px !important;
+          color: #ffffff !important;
+        }
+      }
     }
     .rounded-btn mat-icon { 
       margin: 0 !important; 
@@ -156,7 +207,13 @@ import { Therapy } from '../../../core/models/therapy.model';
       line-height: 20px !important;
       display: block !important;
     }
-    .actions-cell { display: flex; gap: 8px; align-items: center; }
+    .actions-cell { 
+      display: flex; 
+      gap: 12px; 
+      align-items: center; 
+      justify-content: center;
+      width: 100%;
+    }
     .compact-toggle {
       transform: scale(0.8);
       transform-origin: center;
@@ -165,7 +222,7 @@ import { Therapy } from '../../../core/models/therapy.model';
     .bg-white { 
       background-color: #fff !important; 
       color: #2C5F5D !important; 
-      border: 1px solid #d1d1d1 !important;
+      border: 1px solid #E2DDD6 !important;
       box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
     }
   `]
@@ -198,9 +255,14 @@ export class TherapyListComponent implements OnInit {
       { key: 'category', label: 'Category', template: this.catTpl },
       { key: 'price', label: 'Price', template: this.priceTpl },
       { key: 'durationMinutes', label: 'Duration', template: this.durationTpl },
-      { key: 'status', label: 'Status', template: this.statusTpl },
-      { key: 'actions', label: 'Actions', template: this.actionsTpl }
+      { key: 'status', label: 'Status', template: this.statusTpl }
     ];
+
+    const user = this.authService.getCurrentUser();
+    if (user?.role !== 'Receptionist' && user?.role !== 'User') {
+      this.columns.push({ key: 'actions', label: 'Actions', template: this.actionsTpl });
+    }
+
     this.loadData();
     this.searchControl.valueChanges.subscribe(val => {
       if (val) {
@@ -234,7 +296,7 @@ export class TherapyListComponent implements OnInit {
       status: statusVal,
       includeInactive: true 
     }).subscribe({
-      next: (res) => {
+      next: (res: ApiResponse<any>) => {
         this.dataSource.data = res.data?.data || [];
         this.totalCount.set(res.data?.pagination?.total || 0);
         this.loading.set(false);
@@ -255,7 +317,7 @@ export class TherapyListComponent implements OnInit {
 
   openForm(therapy?: Therapy) {
     const ref = this.dialog.open(TherapyFormComponent, { width: '500px', data: therapy });
-    ref.afterClosed().subscribe(res => {
+    ref.afterClosed().subscribe((res: any) => {
       if (res) this.loadData();
     });
   }
@@ -278,7 +340,7 @@ export class TherapyListComponent implements OnInit {
           confirmColor: 'warn' 
         }
       });
-      ref.afterClosed().subscribe(res => {
+      ref.afterClosed().subscribe((res: any) => {
         if (res) {
           this.performStatusUpdate(therapy, false);
         } else {
@@ -298,7 +360,7 @@ export class TherapyListComponent implements OnInit {
         this.notify.success(`Therapy "${therapy.therapyName}" ${action} successfully`);
         this.loadData();
       },
-      error: (err) => {
+      error: (err: any) => {
         this.notify.error(err?.error?.message || `Failed to ${newStatus ? 'activate' : 'deactivate'}`);
         this.loadData(); // Reset toggle state
       }

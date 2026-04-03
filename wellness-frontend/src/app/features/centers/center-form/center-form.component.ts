@@ -73,9 +73,7 @@ import { MatDialog } from '@angular/material/dialog';
             <div class="flex-row">
               <mat-form-field appearance="outline" style="flex: 0 0 130px;">
                 <mat-label>Region</mat-label>
-                <mat-select formControlName="region">
-                  <mat-option value="+91">+91</mat-option>
-                </mat-select>
+                <input matInput value="+91" readonly tabindex="-1" />
               </mat-form-field>
               <mat-form-field appearance="outline" style="flex: 0 0 300px;">
                 <mat-label>Contact Number</mat-label>
@@ -191,19 +189,20 @@ import { MatDialog } from '@angular/material/dialog';
     <mat-dialog-actions align="end">
       <!-- Back button if on Rooms tab -->
       @if (tabGroup.selectedIndex === 1) {
-        <button mat-stroked-button (click)="tabGroup.selectedIndex = 0">
-          <mat-icon iconPositionStart>arrow_back</mat-icon>
-          Back
+        <button mat-stroked-button (click)="tabGroup.selectedIndex = 0" matTooltip="Back">
+          <mat-icon>arrow_back</mat-icon>
         </button>
+        <div class="flex-spacer"></div>
       }
       
-      <!-- Show Next on Tab 0 -->
+      <!-- Tab 0: General Info -->
       @if (tabGroup.selectedIndex === 0) {
+        <button mat-stroked-button mat-dialog-close>Cancel</button>
         <button mat-raised-button color="primary" 
                 [disabled]="!isGeneralInfoValid()" 
                 (click)="nextTab(tabGroup)">
           Next
-          <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+          <mat-icon>arrow_forward</mat-icon>
         </button>
       }
 
@@ -267,8 +266,10 @@ import { MatDialog } from '@angular/material/dialog';
 
     .days-toggle-row {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       padding: 4px 0;
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
     .day-toggle-btn {
@@ -322,6 +323,15 @@ import { MatDialog } from '@angular/material/dialog';
       display: flex;
       gap: 16px;
       align-items: center;
+      @media (max-width: 600px) {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        > mat-form-field {
+          flex: 1 1 auto !important;
+          width: 100% !important;
+        }
+      }
     }
 
     .section-divider {
@@ -391,6 +401,9 @@ import { MatDialog } from '@angular/material/dialog';
       max-height: 180px;
       overflow-y: auto;
       padding-right: 4px;
+      @media (max-width: 480px) {
+        grid-template-columns: 1fr;
+      }
     }
 
     .category-item {
@@ -512,6 +525,7 @@ import { MatDialog } from '@angular/material/dialog';
       background: white;
       border-top: 1px solid #eee;
     }
+    .flex-spacer { flex: 1; }
 
     ::ng-deep .mat-mdc-dialog-content {
       padding: 0 !important;
@@ -663,22 +677,11 @@ export class CenterFormComponent implements OnInit {
     }
 
     // Phone & Region
-    if (center.contactNumber && center.contactNumber.startsWith('+')) {
-      const local = center.contactNumber.slice(-10);
-      const region = center.contactNumber.slice(0, -10);
-      this.form.patchValue({
-        contactNumber: local,
-        region: region || '+91'
-      }, { emitEvent: false });
-    } else if (center.contactNumber && center.contactNumber.length > 10) {
+    // Contact Number Mapping (Standardizing to 10 digits)
+    if (center.contactNumber) {
       this.form.patchValue({
         contactNumber: center.contactNumber.slice(-10),
-        region: center.region || '+91'
-      }, { emitEvent: false });
-    } else {
-      this.form.patchValue({
-        contactNumber: center.contactNumber,
-        region: center.region || '+91'
+        region: '+91'
       }, { emitEvent: false });
     }
   }
@@ -706,7 +709,10 @@ export class CenterFormComponent implements OnInit {
     if (this.form.invalid) return;
     this.loading.set(true);
 
-    const payload = this.form.value;
+    const payload = {
+      ...this.form.value,
+      region: '+91'
+    };
 
     if (this.data && (this.data as any).centerId) {
       const centerId = (this.data as any).centerId;

@@ -64,20 +64,19 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/compo
       <div class="search-group">
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-field">
           <mat-label>Search Bookings</mat-label>
-          <input matInput [formControl]="searchControl" placeholder="Customer name or phone..." (keyup.enter)="onSearch()">
-          <mat-icon matPrefix>search</mat-icon>
+          <input matInput [formControl]="searchControl" (keyup.enter)="onSearch()">
           @if (searchControl.value) {
             <button matSuffix mat-icon-button aria-label="Clear" (click)="clearSearch()">
               <mat-icon>close</mat-icon>
             </button>
           }
         </mat-form-field>
-        <button mat-raised-button color="primary" class="rounded-btn bg-white" (click)="onSearch()">
-          <mat-icon>search</mat-icon> Search
+        <button mat-raised-button color="primary" class="rounded-btn search-btn" (click)="onSearch()" matTooltip="Search">
+           <mat-icon>search</mat-icon> 
         </button>
       </div>
 
-      <div class="right-filters flex items-center gap-4 ml-auto">
+      <div class="right-filters">
 
       @if (!isUserRole()) {
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="filter-center">
@@ -96,33 +95,35 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/compo
         </mat-form-field>
       }
 
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="filter-status">
-        <mat-label>Status</mat-label>
-        <mat-select [formControl]="statusFilter">
-          <mat-option [value]="null">All Statuses</mat-option>
-          <mat-option value="Pending">Pending</mat-option>
-          <mat-option value="Rescheduled">Rescheduled</mat-option>
-          <mat-option value="Completed">Completed</mat-option>
-          <mat-option value="Cancelled">Cancelled</mat-option>
-        </mat-select>
-        @if (statusFilter.value) {
-          <button matSuffix mat-icon-button aria-label="Clear" (click)="statusFilter.setValue(null); $event.stopPropagation()">
-            <mat-icon>close</mat-icon>
-          </button>
-        }
-      </mat-form-field>
+      @if (!isUserRole()) {
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="filter-status">
+          <mat-label>Status</mat-label>
+          <mat-select [formControl]="statusFilter">
+            <mat-option [value]="null">All Statuses</mat-option>
+            <mat-option value="Pending">Pending</mat-option>
+            <mat-option value="Rescheduled">Rescheduled</mat-option>
+            <mat-option value="Completed">Completed</mat-option>
+            <mat-option value="Cancelled">Cancelled</mat-option>
+          </mat-select>
+          @if (statusFilter.value) {
+            <button matSuffix mat-icon-button aria-label="Clear" (click)="statusFilter.setValue(null); $event.stopPropagation()">
+              <mat-icon>close</mat-icon>
+            </button>
+          }
+        </mat-form-field>
 
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="filter-date">
-        <mat-label>Date</mat-label>
-        <input matInput [matDatepicker]="picker" [formControl]="dateFilter">
-        @if (dateFilter.value) {
-          <button matSuffix mat-icon-button aria-label="Clear" (click)="dateFilter.setValue(null); $event.stopPropagation()">
-            <mat-icon>close</mat-icon>
-          </button>
-        }
-        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-datepicker #picker></mat-datepicker>
-      </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="filter-date">
+          <mat-label>Date</mat-label>
+          <input matInput [matDatepicker]="picker" [formControl]="dateFilter">
+          @if (dateFilter.value) {
+            <button matSuffix mat-icon-button aria-label="Clear" (click)="dateFilter.setValue(null); $event.stopPropagation()">
+              <mat-icon>close</mat-icon>
+            </button>
+          }
+          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+      }
       </div>
     </div>
 
@@ -165,9 +166,12 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/compo
            <button mat-icon-button color="warn" matTooltip="Cancel" (click)="onCancel(row)">
              <mat-icon>cancel</mat-icon>
            </button>
-           <button mat-icon-button color="accent" matTooltip="Reschedule" (click)="onReschedule(row)">
-             <mat-icon>update</mat-icon>
-           </button>
+           
+           @if (!isUserRole() || row.bookingStatus !== 'Confirmed') {
+             <button mat-icon-button color="accent" matTooltip="Reschedule" (click)="onReschedule(row)">
+               <mat-icon>update</mat-icon>
+             </button>
+           }
         }
 
         <!-- Admin/Receptionist Actions: Complete -->
@@ -177,8 +181,8 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/compo
            </button>
         }
 
-        <!-- Edit for Administrative Roles -->
-        @if (row && !['Cancelled', 'Completed'].includes(row.bookingStatus)) {
+        <!-- Edit Logic: Global block for Completed/Cancelled; Status block for regular Users -->
+        @if (!['Cancelled', 'Completed'].includes(row.bookingStatus) && (!isUserRole() || row.bookingStatus !== 'Confirmed')) {
           <button *hasPermission="['Bookings', 'edit']" mat-icon-button matTooltip="Edit" [routerLink]="['/bookings', row.bookingId, 'edit']">
             <mat-icon>edit</mat-icon>
           </button>
@@ -195,6 +199,8 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/compo
       gap: 16px; 
       align-items: center;
       flex-wrap: wrap;
+      min-height: 56px;
+      margin-bottom: 24px;
     }
     .bg-white { 
       background-color: #fff !important; 
@@ -206,21 +212,49 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/compo
     .filter-center { width: 220px; 
       ::ng-deep .mat-mdc-text-field-wrapper {
         background-color: #fff !important;
+        height: 48px !important;
       }
+      ::ng-deep .mat-mdc-form-field-infix {
+        padding-top: 12px !important;
+        padding-bottom: 12px !important;
+      }
+      @media (max-width: 600px) { width: 100%; }
     }
     .filter-status { width: 150px; 
       ::ng-deep .mat-mdc-text-field-wrapper {
         background-color: #fff !important;
+        height: 48px !important;
       }
+      ::ng-deep .mat-mdc-form-field-infix {
+        padding-top: 12px !important;
+        padding-bottom: 12px !important;
+      }
+      @media (max-width: 600px) { width: 100%; }
     }
     .filter-date { width: 210px; 
       ::ng-deep .mat-mdc-text-field-wrapper {
         background-color: #fff !important;
+        height: 48px !important;
       }
+      ::ng-deep .mat-mdc-form-field-infix {
+        padding-top: 12px !important;
+        padding-bottom: 12px !important;
+      }
+      @media (max-width: 600px) { width: 100%; }
     }
     
-    .search-group { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 300px; max-width: 450px; }
-    .search-field { width: 100%; max-width: none; flex: 1; 
+    .search-group { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      flex: 1; 
+      min-width: 300px; 
+      max-width: 500px;
+    }
+    .search-field { 
+      width: 100%; 
+      max-width: none; 
+      flex: 1; 
       ::ng-deep .mat-mdc-text-field-wrapper {
         background-color: #fff !important;
       }
@@ -228,13 +262,34 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/compo
     .rounded-btn { 
       border-radius: 50px !important; 
       height: 44px; 
-      padding: 0 24px; 
+      padding: 0 20px; 
       font-weight: 600;
       display: inline-flex !important;
       align-items: center;
       justify-content: center;
       gap: 8px;
       overflow: visible !important;
+      &.search-btn {
+        min-width: 52px;
+        width: 52px;
+        height: 44px;
+        padding: 0;
+        background-color: #2C5F5D !important;
+        color: #ffffff !important;
+        border: none !important;
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px !important;
+        
+        mat-icon {
+          margin: 0 !important;
+          font-size: 20px !important;
+          width: 20px !important;
+          height: 20px !important;
+          color: #ffffff !important;
+        }
+      }
     }
     .rounded-btn mat-icon { 
       margin: 0 !important; 
@@ -244,7 +299,17 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/compo
       line-height: 20px !important;
       display: block !important;
     }
-    .right-filters { display: flex; gap: 16px; margin-left: auto; flex-wrap: wrap; }
+    .right-filters { 
+      display: flex; 
+      gap: 16px; 
+      margin-left: auto; 
+      flex-wrap: wrap;
+      align-items: center;
+      @media (max-width: 992px) {
+        margin-left: 0;
+        width: 100%;
+      }
+    }
     .filter-actions { display: flex; align-items: center; }
     .customer-link {
       /* Reset button styles */
@@ -389,9 +454,11 @@ export class BookingListComponent implements OnInit {
       search: this.searchControl.value ? this.searchControl.value.trim() : ''
     };
 
-    if (this.centerFilter.value) params.centerId = this.centerFilter.value;
-    if (this.statusFilter.value) params.bookingStatus = this.statusFilter.value;
-    if (this.dateFilter.value) {
+    if (this.centerFilter.value && !this.isUserRole()) params.centerId = this.centerFilter.value;
+    if (this.statusFilter.value && !this.isUserRole()) params.bookingStatus = this.statusFilter.value;
+    
+    // For regular users, we ignore the default date filter (today) and fetch all history
+    if (this.dateFilter.value && !this.isUserRole()) {
       const d = this.dateFilter.value;
       const year = d.getFullYear();
       const month = String(d.getMonth() + 1).padStart(2, '0');

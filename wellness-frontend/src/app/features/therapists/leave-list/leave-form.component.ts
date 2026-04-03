@@ -1,16 +1,19 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { LeavesService } from '../../../core/services/leaves.service';
 import { TherapistsService } from '../../../core/services/therapists.service';
+import { CentersService } from '../../../core/services/centers.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { CustomValidators } from '../../../core/validators/custom.validators';
 
@@ -27,12 +30,25 @@ import { CustomValidators } from '../../../core/validators/custom.validators';
     MatSelectModule, 
     MatDatepickerModule, 
     MatNativeDateModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatIconModule
   ],
   template: `
     <h2 mat-dialog-title>Register Leave</h2>
     <mat-dialog-content>
       <form [formGroup]="form" class="flex-form">
+        @if (!isReceptionist()) {
+          <mat-form-field appearance="outline">
+            <mat-label>Filter by Center</mat-label>
+            <mat-select [formControl]="centerFilter" placeholder="Select Center">
+              @for (c of centers(); track c.centerId) {
+                <mat-option [value]="c.centerId">{{ c.name }}</mat-option>
+              }
+            </mat-select>
+            <mat-icon matPrefix style="color: #666; margin-right: 8px;">storefront</mat-icon>
+          </mat-form-field>
+        }
+
         <mat-form-field appearance="outline">
           <mat-label>Therapist</mat-label>
           <mat-select formControlName="therapistId">
@@ -71,17 +87,28 @@ import { CustomValidators } from '../../../core/validators/custom.validators';
       </button>
     </mat-dialog-actions>
   `,
-  styles: [`.flex-form { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }`]
+  styles: [`
+    .flex-form { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+    mat-form-field { 
+      width: 100%; 
+    }
+  `]
 })
 export class LeaveFormComponent implements OnInit {
   dialogRef = inject(MatDialogRef<LeaveFormComponent>);
   private fb = inject(FormBuilder);
   private service = inject(LeavesService);
   private therapistsService = inject(TherapistsService);
+  private centersService = inject(CentersService);
+  private auth = inject(AuthService);
   private notify = inject(NotificationService);
 
   loading = signal(false);
   therapists = signal<any[]>([]);
+  centers = signal<any[]>([]);
+  centerFilter = new FormControl<number | null>(null);
+
+  isReceptionist = () => this.auth.currentUser()?.role === 'Receptionist';
 
   form = this.fb.group({
     therapistId: [null as number | null, Validators.required],
@@ -90,7 +117,28 @@ export class LeaveFormComponent implements OnInit {
   });
 
   ngOnInit() {
-    this.therapistsService.getAll({ limit: 100 }).subscribe(res => {
+    if (!this.isReceptionist()) {
+      this.centersService.getAll({ limit: 100 }).subscribe(res => {
+        this.centers.set(res.data?.data || []);
+      });
+    }
+
+    this.centerFilter.valueChanges.subscribe((val: number | null) => {
+      this.loadTherapists(val);
+      this.form.get('therapistId')?.setValue(null);
+    });
+
+    this.loadTherapists(this.centerFilter.value);
+  }
+
+  loadTherapists(centerId: number | null) {
+    if (!centerId) {
+      this.therapists.set([]);
+      return;
+    }
+    const params: any = { limit: 100, centerId: centerId };
+
+    this.therapistsService.getAll(params).subscribe(res => {
       this.therapists.set(res.data?.data || []);
     });
   }

@@ -159,6 +159,9 @@ const slotService = {
         }
     });
 
+    const isToday = new Date(date).toDateString() === new Date().toDateString();
+    const now = new Date();
+
     const availableSlots = [];
     
     // We no longer use a generatedStore to block other therapists from showing up for the same time.
@@ -195,6 +198,12 @@ const slotService = {
         while (currentSlotStart.getTime() + durationMinutes * 60000 <= dayEndTime.getTime()) {
 
             const currentSlotEnd = new Date(currentSlotStart.getTime() + durationMinutes * 60000);
+
+            // 0. Skip past slots for today
+            if (isToday && currentSlotStart < now) {
+                currentSlotStart = new Date(currentSlotStart.getTime() + durationMinutes * 60000);
+                continue;
+            }
 
             // 1. Therapist busy check
             let therapistBusy = false;

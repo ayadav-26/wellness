@@ -10,6 +10,10 @@ export interface TableColumn {
   label: string;
   template?: any;
   formatter?: (row: any) => string;
+  /** Inline min-width for this column, e.g. '200px'. Overrides the global 150px default. */
+  minWidth?: string;
+  /** Pin this column to the left edge (sticky). */
+  sticky?: boolean;
 }
 
 @Component({

@@ -102,6 +102,29 @@
   padding: $spacing-4 0;
   overflow-y: auto;
   overflow-x: hidden;
+
+  // Firefox scrollbar
+  scrollbar-width: thin;
+  scrollbar-color: rgba(white, 0.15) $sidebar-bg;
+}
+
+// ::ng-deep needed so Angular's view encapsulation doesn't block
+// ::-webkit-scrollbar pseudo-element styles from being applied
+::ng-deep .nav-items::-webkit-scrollbar {
+  width: 4px;
+}
+
+::ng-deep .nav-items::-webkit-scrollbar-track {
+  background: $sidebar-bg; // #1E3A38 — blends with sidebar
+}
+
+::ng-deep .nav-items::-webkit-scrollbar-thumb {
+  background: rgba(white, 0.15);
+  border-radius: 4px;
+
+  &:hover {
+    background: rgba(white, 0.3);
+  }
 }
 
 .nav-item {

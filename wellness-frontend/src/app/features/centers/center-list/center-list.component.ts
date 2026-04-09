@@ -278,12 +278,12 @@ export class CenterListComponent implements OnInit {
 
   ngOnInit() {
     this.columns = [
-      { key: 'name', label: 'Center', template: this.nameTpl },
+      { key: 'name',        label: 'Center',       template: this.nameTpl,   minWidth: '200px', sticky: true },
       { key: 'contactNumber', label: 'Contact' },
-      { key: 'city', label: 'City' },
-      { key: 'openingTime', label: 'Opening Time', template: this.timeTpl },
-      { key: 'closingTime', label: 'Closing Time', template: this.timeTpl },
-      { key: 'status', label: 'Status', template: this.statusTpl }
+      { key: 'city',        label: 'City' },
+      { key: 'openingTime', label: 'Opening',      template: this.timeTpl,   minWidth: '110px' },
+      { key: 'closingTime', label: 'Closing',      template: this.timeTpl,   minWidth: '110px' },
+      { key: 'status',      label: 'Status',       template: this.statusTpl, minWidth: '110px' }
     ];
 
     const user = this.authService.getCurrentUser();

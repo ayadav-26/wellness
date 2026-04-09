@@ -9,11 +9,14 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { CentersService } from '../../../core/services/centers.service';
 import { SearchService } from '../../../core/services/search.service';
 import { SlotsService } from '../../../core/services/slots.service';
 import { BookingsService } from '../../../core/services/bookings.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { CustomValidators } from '../../../core/validators/custom.validators';
 import { Router, ActivatedRoute } from '@angular/router';
 
@@ -30,13 +33,12 @@ import { Router, ActivatedRoute } from '@angular/router';
     MatDatepickerModule,
     MatNativeDateModule,
     MatChipsModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatIconModule,
+    MatTooltipModule
   ],
   template: `
-    <div class="page-header">
-      <h1 class="font-display text-4xl">Reserve Your Sanctuary</h1>
-      <p class="text-secondary">Follow the steps below to schedule your wellness therapy.</p>
-    </div>
+ 
 
     <mat-stepper [linear]="true" #stepper class="wizard-stepper" (selectionChange)="onStepperSelectionChange($event)">
       <!-- Step 1: Center, Therapy & Preference -->
@@ -51,6 +53,7 @@ import { Router, ActivatedRoute } from '@angular/router';
                   <mat-option [value]="center.centerId">{{ center.name }} - {{ center.city }}</mat-option>
                 }
               </mat-select>
+              
             </mat-form-field>
 
              <mat-form-field appearance="outline">
@@ -101,18 +104,20 @@ import { Router, ActivatedRoute } from '@angular/router';
               @if (slotsLoading()) {
                 <div class="loading-slots"><mat-spinner diameter="40"></mat-spinner></div>
               } @else if (slots().length > 0) {
-                <div class="slots-grid">
-                  @for (slot of slots(); track (slot.startTime + slot.therapist.therapistId + slot.room.roomId)) {
-                    <div 
-                      class="slot-chip" 
-                      [class.selected]="step2.get('time')?.value === slot.startTime"
-                      (click)="selectSlot(slot.startTime)">
-                      <span class="slot-time">{{ slot.startTime | date:'HH:mm' }}</span>
-                      @if (slot.therapist) {
-                        <span class="slot-therapist">{{ slot.therapist.firstName }} ({{ slot.therapist.gender }})</span>
-                      }
-                    </div>
-                  }
+                <div class="slots-scroll-box">
+                  <div class="slots-grid">
+                    @for (slot of slots(); track (slot.startTime + slot.therapist.therapistId + slot.room.roomId)) {
+                      <div 
+                        class="slot-chip" 
+                        [class.selected]="step2.get('time')?.value === slot.startTime"
+                        (click)="selectSlot(slot.startTime)">
+                        <span class="slot-time">{{ slot.startTime | date:'HH:mm' }}</span>
+                        @if (slot.therapist) {
+                          <span class="slot-therapist">{{ slot.therapist.firstName }} ({{ slot.therapist.gender }})</span>
+                        }
+                      </div>
+                    }
+                  </div>
                 </div>
               } @else {
                 <p class="no-slots">No slots available for the selected date or preference. Please try another day or change preference.</p>
@@ -216,66 +221,110 @@ import { Router, ActivatedRoute } from '@angular/router';
     </mat-stepper>
   `,
   styles: [`
+    /* ── Page header ─────────────────────────────────────────── */
     .page-header { margin-bottom: 32px; border-bottom: 1px solid #E0E0E0; padding-bottom: 16px; }
+    .header-top { display: flex; align-items: flex-start; gap: 12px; }
+    .back-btn {
+      margin-top: 4px;
+      color: #1E3A38;
+      flex-shrink: 0;
+      &:hover { background: rgba(30,58,56,.08); }
+    }
     .page-header h1 { color: #1E3A38; margin: 0; font-family: 'Cormorant Garamond', serif; font-weight: 500; }
     .text-secondary { color: #666; margin-top: 4px; }
+
+    /* ── Stepper / step layout ───────────────────────────────── */
     .wizard-stepper { background: transparent; }
     .step-content { padding: 32px 0; max-width: 800px; }
     .form-grid { 
       display: grid; 
       grid-template-columns: 1fr 1fr; 
       gap: 24px; 
-      @media (max-width: 768px) {
-        grid-template-columns: 1fr;
-      }
+      @media (max-width: 768px) { grid-template-columns: 1fr; }
     }
     .full-width { grid-column: span 2; @media (max-width: 768px) { grid-column: span 1; } }
     .stepper-actions { margin-top: 32px; display: flex; gap: 16px; flex-wrap: wrap; }
+
+    /* ── Step 2: date + slots ────────────────────────────────── */
     .date-time-grid { 
       display: grid; 
-      grid-template-columns: 350px 1fr; 
-      gap: 40px; 
-      @media (max-width: 992px) {
-        grid-template-columns: 1fr;
-        gap: 24px;
-      }
+      grid-template-columns: 340px 1fr; 
+      gap: 32px;
+      align-items: start;
+      @media (max-width: 992px) { grid-template-columns: 1fr; gap: 24px; }
     }
-    
-    .slots-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-    .slots-header h3 { margin: 0; }
+
+    /* Calendar card */
+    .datepicker-container {
+      background: #ffffff;
+      border: 1px solid #D5E8E6;
+      border-radius: 14px;
+      padding: 8px;
+      box-shadow: 0 2px 10px rgba(30,58,56,0.08);
+      overflow: hidden;
+    }
+    ::ng-deep .datepicker-container mat-calendar {
+      background: transparent !important;
+    }
+    ::ng-deep .datepicker-container .mat-calendar-header {
+      background: transparent !important;
+      padding-top: 4px;
+    }
+    ::ng-deep .datepicker-container .mat-calendar-content {
+      padding: 0 8px 8px !important;
+    }
+
+    .slots-container {
+      display: flex;
+      flex-direction: column;
+    }
+    .slots-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+    .slots-header h3 { margin: 0; font-size: 15px; }
     .preference-badge { font-size: 11px; background: #E0F2F1; color: #00796B; padding: 2px 8px; border-radius: 12px; font-weight: 600; }
 
-    .slots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
+    /* Scrollable box — fills the right column */
+    .slots-scroll-box {
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid #D5E8E6;
+      border-radius: 14px;
+      padding: 14px;
+      background: #F4FAF9;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(30,58,56,0.2) #F4FAF9;
+      &::-webkit-scrollbar { width: 4px; }
+      &::-webkit-scrollbar-track { background: #F4FAF9; }
+      &::-webkit-scrollbar-thumb { background: rgba(30,58,56,0.25); border-radius: 4px; }
+    }
+    .slots-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
     .slot-chip { 
-      padding: 12px 8px; border: 1px solid #D0D0D0; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.2s;
-      display: flex; flex-direction: column; gap: 4px;
-      &:hover { border-color: #2C5F5D; background: rgba(44, 95, 93, 0.05); }
+      padding: 12px 8px; border: 1px solid #C8DFDd; border-radius: 10px; text-align: center;
+      cursor: pointer; transition: all 0.18s; display: flex; flex-direction: column; gap: 4px;
+      background: #ffffff;
+      &:hover { border-color: #2C5F5D; background: rgba(44,95,93,0.06); }
       &.selected { background: #2C5F5D; color: white; border-color: #2C5F5D; font-weight: 500; }
     }
-    .slot-time { font-size: 14px; font-weight: 600; }
+    .slot-time { font-size: 13px; font-weight: 600; }
     .slot-therapist { font-size: 10px; opacity: 0.8; }
+    .loading-slots { display: flex; justify-content: center; padding: 32px 0; }
+    .no-slots { color: #D32F2F; margin-top: 12px; font-size: 13px; }
 
+    /* ── Step 4: summary card ────────────────────────────────── */
     .summary-card { background: white; border: 1px solid #E0E0E0; border-radius: 12px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
     .summary-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed #F0F0F0; }
     .summary-item:last-child { border-bottom: none; }
     .summary-item .label { color: #888; font-weight: 500; }
     .summary-item .value { color: #1A1A1A; font-weight: 600; text-align: right; }
-    .loading-slots { display: flex; justify-content: center; padding: 40px 0; }
-    .no-slots { color: #D32F2F; margin-top: 16px; }
 
+    /* ── Step 3: info form ───────────────────────────────────── */
     .info-form-container { 
       display: flex; flex-direction: column; gap: 20px; max-width: 500px; margin: 0 auto;
       padding: 0 32px;
-      @media (max-width: 600px) {
-        padding: 0 16px;
-      }
+      @media (max-width: 600px) { padding: 0 16px; }
     }
     .phone-row { 
       display: flex; gap: 16px; align-items: flex-start; width: 100%; 
-      @media (max-width: 480px) {
-        flex-direction: column;
-        gap: 0;
-      }
+      @media (max-width: 480px) { flex-direction: column; gap: 0; }
     }
     .region-field { 
       width: 130px !important; flex-shrink: 0; 
@@ -296,7 +345,6 @@ import { Router, ActivatedRoute } from '@angular/router';
       justify-content: center !important;
       min-width: 32px !important;
     }
-    
     ::ng-deep .mat-mdc-form-field-infix {
       display: flex !important;
       align-items: center !important;
@@ -310,9 +358,11 @@ export class BookingWizardComponent implements OnInit {
   private slotsService = inject(SlotsService);
   private bookingsService = inject(BookingsService);
   private notify = inject(NotificationService);
+  private authService = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
+  isReceptionist = signal(false);
   bookingId = signal<number | null>(null);
   isEditMode = signal(false);
 
@@ -347,6 +397,11 @@ export class BookingWizardComponent implements OnInit {
   });
 
   ngOnInit() {
+    // Check if logged-in user is a receptionist
+    const user = this.authService.getCurrentUser();
+    const isRec = user?.role === 'Receptionist';
+    this.isReceptionist.set(isRec);
+
     // Check for edit/reschedule mode
     this.route.params.subscribe(params => {
       if (params['id']) {
@@ -360,9 +415,20 @@ export class BookingWizardComponent implements OnInit {
       next: (res) => {
         this.centers.set(res.data?.data || []);
         this.centersLoading.set(false);
+
+        // Auto-select & lock the receptionist's assigned center
+        if (isRec && user?.centerId) {
+          this.step1.get('centerId')?.setValue(user.centerId);
+          this.step1.get('centerId')?.disable();
+          this.loadTherapiesForCenter(user.centerId);
+        }
       },
       error: () => this.centersLoading.set(false)
     });
+  }
+
+  goBack() {
+    this.router.navigate(['/bookings']);
   }
   onCenterChange() {
     const centerId = this.step1.get('centerId')?.value;

@@ -7,11 +7,11 @@
     <div class="table-container desktop-view">
       <mat-table [dataSource]="dataSource">
         @for (col of columns; track col.key) {
-          <ng-container [matColumnDef]="col.key">
-            <mat-header-cell *matHeaderCellDef>
+          <ng-container [matColumnDef]="col.key" [sticky]="col.sticky ?? false">
+            <mat-header-cell *matHeaderCellDef [style.min-width]="col.minWidth || null">
               {{ col.label }}
             </mat-header-cell>
-            <mat-cell *matCellDef="let row">
+            <mat-cell *matCellDef="let row" [style.min-width]="col.minWidth || null">
               @if (col.template) {
                 <ng-container
                   [ngTemplateOutlet]="col.template"
